@@ -1,0 +1,28 @@
+{
+  "records": [
+    {
+      "city": "mock-social-scope", "external_id": "case-a", "source_url": "https://social.example.invalid/2c/case-a",
+      "payload": {"content_type": "SOCIAL_POST", "title": "Rooftop sunset", "text": "晚上来这里看 sunset 真的很好看，很适合 date。", "author_identifier": "mock-author-a", "published_at": "2026-09-20T12:00:00Z", "language": "zh", "hashtags": ["sunset"], "media_metadata": [{"type": "image", "count": 1}], "source_metadata": {"format": "short_post"}, "geo_tag": {"level": "POI", "name": "Example Rooftop", "city": "Mock City", "country": "ZZ", "category": "restaurant", "latitude": 0.0001, "longitude": 0.0001}}
+    },
+    {
+      "city": "mock-social-scope", "external_id": "case-b", "source_url": "https://social.example.invalid/2c/case-b",
+      "payload": {"content_type": "SOCIAL_POST", "text": "Example Matcha Cafe 的抹茶很好喝。", "language": "zh", "text_mentions": [{"name": "Example Matcha Cafe", "city": "Mock City", "country": "ZZ", "category": "cafe", "context": "Example Matcha Cafe 的抹茶很好喝。"}]}
+    },
+    {
+      "city": "mock-social-scope", "external_id": "case-c", "source_url": "https://social.example.invalid/2c/case-c",
+      "payload": {"content_type": "SOCIAL_POST", "text": "今天去了 Cafe A 和 Bar B。Cafe A 适合学习，Bar B 晚上的 cocktail 很好。", "language": "zh", "text_mentions": [{"name": "Cafe A", "city": "Mock City", "country": "ZZ", "category": "cafe", "context": "Cafe A 适合学习"}, {"name": "Bar B", "city": "Mock City", "country": "ZZ", "category": "restaurant", "context": "Bar B 晚上的 cocktail 很好"}]}
+    },
+    {
+      "city": "mock-social-scope", "external_id": "case-d", "source_url": "https://social.example.invalid/2c/case-d",
+      "payload": {"content_type": "SOCIAL_POST", "text": "涩谷随便找到的一家咖啡店，环境很好。", "geo_tag": {"level": "AREA", "name": "Shibuya"}, "text_mentions": [{"name": "Unidentified cafe", "city": "Mock City", "country": "ZZ", "category": "cafe", "context": "一家咖啡店，环境很好"}]}
+    },
+    {
+      "city": "mock-social-scope", "external_id": "case-e", "source_url": "https://social.example.invalid/2c/case-e",
+      "payload": {"content_type": "SOCIAL_POST", "text": "东京今天的天气太舒服了。"}
+    },
+    {
+      "city": "mock-social-scope", "external_id": "case-f", "source_url": "https://social.example.invalid/2c/case-f",
+      "payload": {"content_type": "SOCIAL_POST", "text": "这个周末 Example Gallery 有一个摄影展。", "text_mentions": [{"name": "Example Gallery", "city": "Mock City", "country": "ZZ", "category": "museum", "context": "Example Gallery 有一个摄影展"}], "events": [{"name": "摄影展", "starts_at": "2026-09-26T10:00:00Z", "ends_at": "2026-09-27T18:00:00Z", "venue_name": "Example Gallery"}]}
+    }
+  ]
+}

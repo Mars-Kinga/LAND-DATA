@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Tuple
 
 SENSITIVE_KEYS = ("password", "passwd", "cookie", "token", "secret", "authorization", "session")
+MEDIA_METADATA_FIELDS = ("type", "count", "width", "height", "duration_seconds", "mime_type")
 
 
 def remove_secrets(value: Any) -> Any:
@@ -31,7 +32,14 @@ class SourcePolicy:
             raise ValueError("normalized fields must be retained in raw records")
 
     def retained_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        return remove_secrets({key: payload[key] for key in self.raw_fields if key in payload})
+        retained = remove_secrets({key: payload[key] for key in self.raw_fields if key in payload})
+        if isinstance(retained.get("media_metadata"), list):
+            retained["media_metadata"] = [
+                {key: item[key] for key in MEDIA_METADATA_FIELDS if key in item}
+                for item in retained["media_metadata"] if isinstance(item, dict)]
+        elif "media_metadata" in retained:
+            retained.pop("media_metadata")
+        return retained
 
     def temporary_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         return remove_secrets({key: payload[key] for key in self.temporary_fields if key in payload})

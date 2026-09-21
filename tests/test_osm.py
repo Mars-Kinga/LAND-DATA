@@ -167,8 +167,11 @@ class OSMTests(unittest.TestCase):
         self.assertIn("data=", form)
 
     def test_changed_raw_snapshot_keeps_one_source_identity(self):
-        self.pipeline.run(SCOPE.name, [self.adapter([OBJECTS[0]])], SCOPE)
-        changed = dict(OBJECTS[0], tags={**OBJECTS[0]["tags"], "website": "https://new.invalid/"})
+        original = dict(OBJECTS[0], tags={**OBJECTS[0]["tags"], "opening_hours": "10:00-18:00"})
+        self.pipeline.run(SCOPE.name, [self.adapter([original])], SCOPE)
+        before_poi = self.storage.all(POI)[0]
+        changed = dict(original, tags={**original["tags"], "website": "https://new.invalid/",
+                                        "opening_hours": "09:00-20:00"})
         self.pipeline.run(SCOPE.name, [self.adapter([changed])], SCOPE)
         self.assertEqual(len(self.storage.all(RawSourceRecord)), 2)
         self.assertEqual(len(self.storage.all(SourceContent)), 1)
@@ -177,6 +180,16 @@ class OSMTests(unittest.TestCase):
         content = self.storage.all(SourceContent)[0]
         raw = self.storage.get(RawSourceRecord, content.raw_record_id)
         self.assertEqual(raw.payload["locations"][0]["website"], "https://new.invalid/")
+        after_poi = self.storage.get(POI, before_poi.id)
+        self.assertEqual(after_poi.website, "https://new.invalid/")
+        self.assertEqual(after_poi.opening_hours, "09:00-20:00")
+        self.assertNotEqual(after_poi.updated_at, before_poi.updated_at)
+        self.assertNotEqual(after_poi.last_verified_at, before_poi.last_verified_at)
+        fields = {item.field_name: item for item in self.storage.all(FieldProvenance)
+                  if item.entity_type == "POI" and item.entity_id == after_poi.id}
+        self.assertEqual(fields["website"].source_field, "tags.website")
+        self.assertEqual(fields["opening_hours"].source_field, "tags.opening_hours")
+        self.assertEqual(fields["website"].collected_at, content.collected_at)
 
     def test_geo_scope_validation_and_independent_city(self):
         self.assertEqual(load_scope(str(ROOT / "config/osm-acceptance-scope.json")).city, "Tokyo")

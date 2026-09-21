@@ -8,6 +8,7 @@ from .models import (Event, EventCandidate, LocationEvidence, POI, POICandidate,
                      POIMention, RawSourceRecord, RecommendationSignal, SourceContent)
 from .policy import SourcePolicy
 from .processing import extract, normalize, resolve, validate_score_review
+from .social_processing import process_social
 from .storage import Storage
 from .util import safe_source_url, stable_id, utc_now
 
@@ -45,9 +46,24 @@ class Pipeline:
     def _parse_one(self, record: RawSourceRecord, policy: SourcePolicy,
                    transient: Optional[Dict] = None) -> None:
         content = normalize(record, policy)
+        previous = self.storage.get(SourceContent, content.id)
+        if self.config.sources[record.source].processing_kind == "social":
+            if content.content_status not in ("ACTIVE", "UPDATED", "UNAVAILABLE"):
+                raise ValueError("invalid social content status")
+            fields = ("title", "text", "geo_tag", "hashtags", "media_metadata",
+                      "language", "author_identifier", "published_at")
+            if (previous and content.content_status == "ACTIVE" and
+                    (previous.content_status == "UNAVAILABLE" or
+                     any(getattr(previous, field) != getattr(content, field) for field in fields))):
+                content.content_status = "UPDATED"
+            elif previous and previous.content_status == "UPDATED" and content.content_status == "ACTIVE":
+                content.content_status = "UPDATED"
         self.storage.put(content)
-        extract(content, self.storage, record.payload,
-                self.config.sources[record.source].allow_coordinate_verification, transient)
+        if self.config.sources[record.source].processing_kind == "social":
+            process_social(content, self.storage, record.payload, transient)
+        else:
+            extract(content, self.storage, record.payload,
+                    self.config.sources[record.source].allow_coordinate_verification, transient)
 
     def parse(self, city: str) -> int:
         self.storage.purge_expired_raw(utc_now())

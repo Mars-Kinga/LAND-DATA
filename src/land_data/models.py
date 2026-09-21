@@ -29,6 +29,13 @@ class SourceContent:
     author_identifier: Optional[str] = None
     published_at: Optional[str] = None
     raw_metadata: Dict[str, Any] = field(default_factory=dict)
+    canonical_url: Optional[str] = None
+    geo_tag: Optional[Dict[str, Any]] = None
+    hashtags: List[str] = field(default_factory=list)
+    media_metadata: List[Dict[str, Any]] = field(default_factory=list)
+    language: Optional[str] = None
+    content_status: str = "ACTIVE"
+    collection_scope: Optional[str] = None
 
 
 @dataclass
@@ -73,6 +80,7 @@ class POICandidate:
     aliases: List[str] = field(default_factory=list)
     address: str = ""
     website: str = ""
+    opening_hours: str = ""
     source_tags: Dict[str, str] = field(default_factory=dict)
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -96,6 +104,7 @@ class POIMention:
     confidence_score: float = 0.0
     review_status: str = "NEEDS_REVIEW"
     review_reasons: List[str] = field(default_factory=list)
+    active: bool = True
 
     def __post_init__(self) -> None:
         if not (self.poi_id or self.poi_candidate_id):

@@ -1,6 +1,6 @@
 # LAND-Data
 
-LAND 的独立地点与推荐数据基础设施。第二阶段 2B 增加一个限量的 OpenStreetMap / Overpass 结构化来源，供独立集成验证。社交来源仍仅使用虚构 Mock 数据；不登录真实账号、不调用 LLM，也不修改相邻的 LAND iOS 项目。
+LAND 的独立地点与推荐数据基础设施。2B 增加了限量的 OpenStreetMap / Overpass 结构化来源；2C 增加平台无关的社交内容处理层与完整离线验收。社交来源仍仅使用虚构 Mock 数据；不登录真实账号、不调用 LLM，也不修改相邻的 LAND iOS 项目。
 
 ## 运行
 
@@ -42,11 +42,27 @@ LAND 的独立地点与推荐数据基础设施。第二阶段 2B 增加一个�
 ./land-data --db .local/osm-acceptance.db export --scope config/osm-acceptance-scope.json --output .local/exports/osm-acceptance.json
 ```
 
-也可以使用 `pipeline --source osm --scope ...` 一次运行完整链路。重复执行相同范围可以检查幂等性。OSM 不需要 `auth`。不传 `--source` 与 `--scope` 时，原有 Mock CLI 行为保持不变；OSM 与 Mock 来源不可在同一次 collect/pipeline 混用。`--scope` 的 `name` 用于 Raw 采集与 parse 筛选，`city` 用于 POI 元数据与现有按城市导出；同一数据库里多个 scope 共享同一城市时，导出会包含该城市的全部可见 POI。
+也可以使用 `pipeline --source osm --scope ...` 一次运行完整链路。重复执行相同范围可以检查幂等性。OSM 不需要 `auth`。不传 `--source` 与 `--scope` 时，原有 Mock CLI 行为保持不变；一次 scoped collect/pipeline 只允许一个来源。`--scope` 的 `name` 用于采集与 parse 筛选，`city` 用于 POI 元数据。2C 起 `export --scope` 只包含该 scope 的 POI；不指定 scope 时仍按城市导出。
 
 2026-09-21 的受限真实验收：同一 bbox 返回 10 个 OSM 对象。第一次完成 collect、parse、validate、export 后有 10 Raw、10 SourceContent、10 Candidate、10 POI、47 条字段来源，10 个 POI 均为 `AUTO_APPROVED` 且可见，导出 10 个。第二次用同样的 bbox、类别、20 条上限和 15 秒超时执行完整 `pipeline` 后，四层数量、来源数量与导出 POI ID 集合均未变化。本机 Python 3.9 的默认 CA 路径不存在，实际请求使用 `SSL_CERT_FILE=/etc/ssl/cert.pem` 指向系统 CA，TLS 校验始终开启；若系统 Python 已有可信 CA，无需设置该变量。一次服务端读取超时由 Adapter 的单次轻量重试处理。
 
 OSM 对象身份由 `node/way/relation` 和对象 ID 组成；SourceContent 稳定去重，未变化的 Raw 快照也不会重复存储。Raw 保留对象类型、ID、必要 tags、坐标及采集时间，不存整份 Overpass 响应。仅在名称、有效坐标、受支持类别和可信结构化证据齐全时才自动创建 POI；缺少必要字段或类别未知的 Candidate 进入审核并保留原 tags。字段级 FieldProvenance 保存 OSM 来源内容引用及 `tags.name`、`tags.amenity`、`tags.website`、`lat` 或 `center.lat` 等路径。可见 OSM POI 的导出附带 OpenStreetMap / ODbL 署名信息；对外使用该数据时仍须遵守 [OSM 署名与许可要求](https://www.openstreetmap.org/copyright)。
+
+同一 OSM 对象的 tags 更新后，仍使用同一个 SourceContent、Candidate 和 POI ID；原 POI 的名称、坐标、类别、地址、网站和营业时间按新来源值同步，变动字段的 FieldProvenance、`updated_at` 和 `last_verified_at` 同步更新。仅同步该 OSM Candidate 自己创建的 POI，避免覆盖从其他来源匹配到的地点。没有引入通用历史版本系统。
+
+## Social Content Foundation（第二阶段 2C）
+
+`MockSocialAdapter` 只读取虚构 fixture，交给通用的 SourceItem / RawSourceRecord 链路；它不判断地点、推荐或审核状态。`SourceContent` 支持规范 URL、作者、标题、正文、发布时间、Geo Tag、hashtag、语言和仅含结构信息的媒体 metadata；这些字段可缺失。`config/sources.json` 为社交来源分别声明 Raw、Normalized、临时与 Export 字段及保留期。`ACTIVE`、`UPDATED`、`UNAVAILABLE` 是最小内容状态，同一 `platform + external_id` 始终保留一个 SourceContent 身份；不可用内容的 Mention 不再导出。相同 Raw 快照再次采集时只刷新最近采集与到期时间，不增加 Raw 行数；内容恢复可复用原身份。帖子更新后不再支持的 Mention 标为 inactive，保留记录但不参与聚合或导出。
+
+`social_processing.py` 定义 LocationExtractor 和 RecommendationExtractor 接口，目前只实现 `GeoTagExtractor`、fixture 标注的文本地点提取与少量规则推荐词。证据强度统一放在 `EVIDENCE_STRENGTH`；AREA Geo Tag 只能作为低强度区域证据，不能直接变成 POI。每个地点的推荐规则只读取与该地点关联的文本片段，避免一帖多地时把 `study` 和 `cocktail` 同时挂到 Cafe A、Bar B。提取后复用既有 Candidate、Evidence、Mention、Signal、Event、Entity Resolution、Review 和 Export 流程。
+
+完整离线验收不会请求 OSM 网络：
+
+```sh
+PYTHONPATH=src python3 scripts/social_acceptance.py --db .local/social-acceptance.db --output .local/exports/social-acceptance.json
+```
+
+脚本先用模拟 OSM 响应创建 Example Rooftop、Example Matcha Cafe、Cafe A、Bar B、Example Gallery，再导入六篇虚构帖子。预期 11 Raw / SourceContent / Candidate、5 POI、4 Mention、5 Signal、1 EventCandidate 和 1 Event；导出 5 POI 与 4 Mention。每个 POI 的 Mention 数、信号聚合、来源和审核状态会打印出来。也可在种子 POI 建好后，单独用 `./land-data --db .local/social-acceptance.db pipeline --source mock-social-2c --scope config/social-acceptance-scope.json` 重放 Mock 社交输入。
 
 测试：
 
@@ -66,7 +82,7 @@ SourceAdapter（PUBLIC 或 AUTHENTICATED）
 ```
 
 - **POI**：正式地点；多语言名称、别名、坐标、类别、字段来源、质量、审核和地图可见性分开存储。
-- **SourceContent**：来源内容。`platform + external_id` 为稳定身份；Raw 快照可因内容变化而增加。
+- **SourceContent**：来源内容。`platform + external_id` 为稳定身份；Raw 快照可因内容变化而增加。保留采集 scope 以支持 Raw 过期后的隔离导出。
 - **POICandidate**：待匹配地点；证据不够时保留并进入审核，不直接发布 Marker。
 - **POIMention**：内容与地点的关系，可先只关联 `poi_candidate_id`，解析后同时绑定 `poi_id`；数据库约束保证两者至少一个存在。
 - **RecommendationSignal**：属于 Mention 的轻量 `type/value` 信号。SQLite 按已批准 Mention 的不同 SourceContent 聚合，无需查看时调用 LLM。
@@ -79,7 +95,7 @@ SourceAdapter（PUBLIC 或 AUTHENTICATED）
 
 ## 匹配、审核与导出
 
-基础 Entity Resolution 只用规范化名称或别名、城市、国家、类别和 250 米坐标距离。唯一精确匹配可绑定现有 POI；多个匹配、坐标冲突或证据不足进入 `NEEDS_REVIEW`，并留下 `AMBIGUOUS_POI_MATCH`、`CONFLICTING_COORDINATES`、`INSUFFICIENT_LOCATION_EVIDENCE` 等机器可读原因。只有配置明确授权坐标验证的结构化 Mock 来源，才能自动创建 POI。没有模糊 NLP 或真实来源适配器。
+基础 Entity Resolution 只用规范化名称或别名、城市、国家、类别和 250 米坐标距离。唯一精确匹配可绑定现有 POI；多个匹配、坐标冲突或证据不足进入 `NEEDS_REVIEW`，并留下 `AMBIGUOUS_POI_MATCH`、`CONFLICTING_COORDINATES`、`INSUFFICIENT_LOCATION_EVIDENCE` 等机器可读原因。只有配置明确授权坐标验证的结构化来源（Mock Places、OSM），才能自动创建 POI。社交内容仅匹配既有 POI 或进入审核；没有模糊 NLP 或真实社交 Adapter。
 
 POI 的 `map_visibility` 只有在坐标有效且已验证、验证通过、审核为 `AUTO_APPROVED`、地点有效且置信度达到配置阈值时为真。`REJECTED` 不会被重复验证自动改回批准。导出只包含可见 POI 和已批准 Mention；每个来源的 `export_fields` 决定来源链接、推荐摘要、信号能否进入最终数据。导出 schema 与 LAND iOS 现有 `Place` v1 并不相同，尚未接入 App。
 
@@ -137,6 +153,7 @@ src/land_data/
   models.py              核心数据模型
   geoscope.py            采集范围与 bbox 校验
   osm.py                 单一受限 Overpass Adapter、响应解析与类别映射
+  social_processing.py   通用社交地点与推荐提取接口和确定性实现
   policy.py              字段 allowlist、保留期限和敏感字段过滤
   storage.py             Pipeline 使用的 Storage 接口
   sqlite_storage.py      SQLite 表与唯一 SQL 实现
@@ -146,6 +163,7 @@ src/land_data/
   export.py              可部署 Mock 数据集
   cli.py                 命令行入口
 tests/                  自动化测试
+scripts/social_acceptance.py  完全离线的 2C 验收脚本
 ```
 
 ## 当前边界
@@ -155,5 +173,6 @@ tests/                  自动化测试
 - 匹配算法仅适合基础精确场景；同名地点、多语言变体和复杂坐标冲突需要后续审核与算法改进。
 - 当前仅有本机 `local-user`，没有多用户并发锁、权限系统或撤销/合并审核工作流。
 - 机器原因码覆盖当前基础规则；跨来源冲突检测与复杂同名实体匹配仍待后续阶段。
-- OSM 只支持少数确定性类别、bbox 查询和小样本采集；Way/Relation 使用 Overpass 返回的几何中心，中心可能不在多边形内。当前导出仍按 POI.city 筛选，未实现 scope 级导出隔离。来源数据变化后已解析 POI 的字段同步与历史版本治理未在 2B 实现。
+- OSM 只支持少数确定性类别、bbox 查询和小样本采集；Way/Relation 使用 Overpass 返回的几何中心，中心可能不在多边形内。scope 隔离根据 POI FieldProvenance 追溯 SourceContent 的采集 scope；没有复杂地理层级。OSM 更新同步只覆盖它原始创建的 POI，不提供完整版本历史。
+- 社交地点识别目前依赖 fixture 标注，规则推荐仅覆盖少数示例词；没有真实平台 Adapter。`UNAVAILABLE` 内容的旧 Derived 行保留用于追溯但不发布；删除地点后旧 Mention 失活，但旧 Candidate、Event 和审核历史没有通用版本修订系统。
 - 当前导出是 LAND-Data 的独立 schema；LAND iOS 现有 `Place` 契约没有 Mention/Signal 列表，接入需要单独设计并经确认。

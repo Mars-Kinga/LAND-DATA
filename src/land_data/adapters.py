@@ -2,7 +2,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, Protocol
+from typing import Any, Dict, Iterable, Optional, Protocol
 
 from .auth import AuthRequired, MockSessionStore
 
@@ -14,6 +14,17 @@ class AdapterCapability:
     supports_search: bool = False
     supports_content_text: bool = False
     supports_media_metadata: bool = False
+    supports_text: bool = False
+    supports_title: bool = False
+    supports_hashtags: bool = False
+    supports_author: bool = False
+    requires_authentication: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.requires_authentication is None:
+            object.__setattr__(self, "requires_authentication", self.access_mode == "AUTHENTICATED")
+        elif self.requires_authentication != (self.access_mode == "AUTHENTICATED"):
+            raise ValueError("authentication capability conflicts with access mode")
 
 
 @dataclass(frozen=True)
@@ -48,3 +59,7 @@ class MockSourceAdapter:
         for record in records:
             if record["city"] == city:
                 yield SourceItem(self.name, record["external_id"], record["source_url"], record["payload"])
+
+
+class MockSocialAdapter(MockSourceAdapter):
+    """Fixture transport only; interpretation belongs to social_processing."""

@@ -34,6 +34,29 @@
         "retention_days": 30
       }
     },
+    "mock-social-2c": {
+      "fixture": "fixtures/mock_social_2c.json",
+      "processing_kind": "social",
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_geo_tag": true,
+        "supports_content_text": true,
+        "supports_media_metadata": true,
+        "supports_text": true,
+        "supports_title": true,
+        "supports_hashtags": true,
+        "supports_author": true,
+        "requires_authentication": false
+      },
+      "policy": {
+        "raw_fields": ["content_type", "title", "text", "author_identifier", "published_at", "geo_tag", "hashtags", "media_metadata", "language", "source_metadata", "text_mentions", "events", "content_status"],
+        "normalized_fields": ["content_type", "title", "text", "author_identifier", "published_at", "geo_tag", "hashtags", "media_metadata", "language", "source_metadata", "content_status"],
+        "temporary_fields": [],
+        "export_fields": ["source_url", "recommendation_summary", "recommendation_signals"],
+        "retention_days": 7
+      }
+    },
     "mock-social": {
       "fixture": "fixtures/mock_social.json",
       "allow_coordinate_verification": false,

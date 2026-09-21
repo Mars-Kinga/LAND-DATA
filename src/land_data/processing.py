@@ -13,21 +13,26 @@ from .util import normalize_url, normalized_name, stable_id, utc_now
 def normalize(record: RawSourceRecord, policy: SourcePolicy) -> SourceContent:
     data = {key: record.payload[key] for key in policy.normalized_fields if key in record.payload}
     metadata = {key: data[key] for key in ("locations", "events", "source_kind",
-                                          "osm_object_type", "osm_object_id") if key in data}
+                                          "osm_object_type", "osm_object_id", "source_metadata") if key in data}
     if "locations" in metadata:
         metadata["locations"] = [
             {key: value for key, value in location.items()
              if key not in ("evidence", "relation_type", "recommendation_summary", "recommendation_signals")}
             for location in metadata["locations"]]
+    canonical_url = normalize_url(record.source_url) if record.source_url else None
     return SourceContent(
         id=stable_id(record.source, record.external_id), raw_record_id=record.id,
         platform=record.source, external_id=record.external_id,
-        source_url=normalize_url(record.source_url) if record.source_url else None,
+        source_url=canonical_url, canonical_url=canonical_url,
         content_type=str(data.get("content_type", "POST")),
         title=str(data.get("title", "")), text=str(data.get("text", "")),
         author_identifier=data.get("author_identifier"),
         published_at=data.get("published_at"), collected_at=record.collected_at,
-        raw_metadata=metadata)
+        raw_metadata=metadata, geo_tag=data.get("geo_tag"),
+        hashtags=list(data.get("hashtags", [])),
+        media_metadata=list(data.get("media_metadata", [])),
+        language=data.get("language"), content_status=data.get("content_status", "ACTIVE"),
+        collection_scope=record.city)
 
 
 def extract(content: SourceContent, storage: Storage, source_payload: Dict,
@@ -53,6 +58,7 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
             name_locale=str(location.get("name_locale", "und")),
             aliases=list(location.get("aliases", [])), address=str(location.get("address", "")),
             website=str(location.get("website", "")),
+            opening_hours=str(location.get("opening_hours", "")),
             source_tags=dict(location.get("osm_tags", {})),
             city=str(location["city"]), country=str(location["country"]),
             category=str(location.get("category", "other")), created_at=now,
@@ -61,11 +67,17 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
             coordinate_verified=allow_coordinate_verification and location.get("coordinate_verified") is True,
             confidence_score=round(confidence, 3))
         previous = storage.get(POICandidate, candidate_id)
+        identity_changed = bool(previous and candidate.source_kind == "content" and
+                                (previous.name, previous.city, previous.country, previous.category,
+                                 previous.latitude, previous.longitude) !=
+                                (candidate.name, candidate.city, candidate.country, candidate.category,
+                                 candidate.latitude, candidate.longitude))
         if previous:
             candidate.created_at = previous.created_at
-            candidate.resolved_poi_id = previous.resolved_poi_id
-            candidate.review_status = previous.review_status
-            candidate.review_reasons = previous.review_reasons
+            if not identity_changed:
+                candidate.resolved_poi_id = previous.resolved_poi_id
+                candidate.review_status = previous.review_status
+                candidate.review_reasons = previous.review_reasons
         storage.put(candidate)
         for evidence_index, evidence in enumerate(evidence_items):
             evidence_id = stable_id("evidence", candidate_id, evidence_index)
@@ -75,7 +87,8 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
                 type=str(evidence["type"]), raw_value=str(evidence["raw_value"]),
                 confidence=float(evidence["confidence"]),
                 created_at=previous_evidence.created_at if previous_evidence else now,
-                matched_poi_id=previous_evidence.matched_poi_id if previous_evidence else None))
+                matched_poi_id=(previous_evidence.matched_poi_id
+                                if previous_evidence and not identity_changed else None)))
         relation = location.get("relation_type")
         if relation:
             mention_id = stable_id("mention", content.id, index)
@@ -86,11 +99,15 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
                 recommendation_summary=str(location.get("recommendation_summary", "")),
                 confidence_score=candidate.confidence_score,
                 created_at=previous_mention.created_at if previous_mention else now,
-                review_status=previous_mention.review_status if previous_mention else "NEEDS_REVIEW",
-                review_reasons=previous_mention.review_reasons if previous_mention else [])
+                review_status=(previous_mention.review_status
+                               if previous_mention and not identity_changed else "NEEDS_REVIEW"),
+                review_reasons=(previous_mention.review_reasons
+                                if previous_mention and not identity_changed else []))
             storage.put(mention)
+            signal_ids = []
             for signal_index, value in enumerate(location.get("recommendation_signals", [])):
                 signal_id = stable_id("signal", mention_id, signal_index)
+                signal_ids.append(signal_id)
                 previous_signal = storage.get(RecommendationSignal, signal_id)
                 storage.put(RecommendationSignal(
                     id=signal_id, poi_mention_id=mention_id, type=str(value["type"]),
@@ -98,6 +115,7 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
                     confidence=float(value.get("confidence", 0.7)),
                     evidence_reference=str(value.get("evidence_reference", "text")),
                     created_at=previous_signal.created_at if previous_signal else now))
+            storage.prune_signals(mention_id, signal_ids)
     for index, event in enumerate(metadata.get("events", [])):
         event_id = stable_id("event-candidate", content.id, index)
         previous_event = storage.get(EventCandidate, event_id)
@@ -148,12 +166,55 @@ def possible_poi_matches(storage: Storage, candidate: POICandidate) -> List[dict
                                                match["distance_meters"] or 0, match["poi"].id))
 
 
+def sync_osm_poi(storage: Storage, candidate: POICandidate) -> None:
+    """Update only the POI originally created from this stable OSM object."""
+    if candidate.resolved_poi_id != stable_id("poi", candidate.id):
+        return
+    content = storage.get(SourceContent, candidate.source_content_id)
+    if not content or content.platform != "osm" or not candidate.name.strip():
+        return
+    if not valid_coordinates(candidate.latitude, candidate.longitude) or candidate.category == "unknown":
+        return
+    poi = storage.get(POI, candidate.resolved_poi_id)
+    if poi is None:
+        return
+    values = {"names": {candidate.name_locale: candidate.name},
+              "latitude": candidate.latitude, "longitude": candidate.longitude,
+              "category": candidate.category, "address": candidate.address,
+              "website": candidate.website, "opening_hours": candidate.opening_hours}
+    changed = [field for field, value in values.items() if getattr(poi, field) != value]
+    if not changed:
+        return
+    now = utc_now()
+    for field in changed:
+        setattr(poi, field, values[field])
+    poi.updated_at = now
+    poi.last_verified_at = now
+    poi.confidence_score = candidate.confidence_score
+    storage.put(poi)
+    tag_key = "amenity" if "amenity" in candidate.source_tags else "tourism"
+    prefix = "center." if content.raw_metadata.get("osm_object_type") in ("way", "relation") else ""
+    origin = {"names": "tags.name", "latitude": prefix + "lat", "longitude": prefix + "lon",
+              "category": "tags." + tag_key, "address": "tags.addr:full",
+              "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website",
+              "opening_hours": "tags.opening_hours"}
+    for field in changed:
+        storage.put(FieldProvenance(
+            id=stable_id("provenance", poi.id, field, content.id),
+            entity_type="POI", entity_id=poi.id, field_name=field,
+            source="osm", source_content_id=content.id,
+            collected_at=content.collected_at, verified_at=now,
+            source_field=origin[field]))
+
+
 def resolve(storage: Storage) -> None:
     candidates = sorted(storage.all(POICandidate), key=lambda value: (value.source_kind != "structured", value.id))
     for candidate in candidates:
         if candidate.review_status == "REJECTED":
             continue
         if candidate.resolved_poi_id:
+            if candidate.source_kind == "structured":
+                sync_osm_poi(storage, candidate)
             continue
         if not candidate.name.strip() or not candidate.city.strip() or not candidate.country.strip():
             candidate.review_reasons = ["MISSING_REQUIRED_FIELD"]
@@ -193,7 +254,7 @@ def resolve(storage: Storage) -> None:
                 latitude=candidate.latitude, longitude=candidate.longitude,
                 address=candidate.address, city=candidate.city, country=candidate.country,
                 category=candidate.category, created_at=now, updated_at=now,
-                website=candidate.website,
+                website=candidate.website, opening_hours=candidate.opening_hours,
                 last_verified_at=now, confidence_score=candidate.confidence_score,
                 coordinates_verified=True))
             source_content = storage.get(SourceContent, candidate.source_content_id)
@@ -202,13 +263,16 @@ def resolve(storage: Storage) -> None:
                 fields.append("address")
             if candidate.website:
                 fields.append("website")
+            if candidate.opening_hours:
+                fields.append("opening_hours")
             tag_key = "amenity" if "amenity" in candidate.source_tags else "tourism"
             geometry_prefix = ("center." if source_content.raw_metadata.get("osm_object_type") != "node"
                                else "")
             origin = {"names": "tags.name", "latitude": geometry_prefix + "lat",
                       "longitude": geometry_prefix + "lon", "category": "tags." + tag_key,
                       "address": "tags.addr:full",
-                      "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website"}
+                      "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website",
+                      "opening_hours": "tags.opening_hours"}
             for field_name in fields:
                 storage.put(FieldProvenance(
                     id=stable_id("provenance", poi_id, field_name, candidate.source_content_id),
@@ -248,6 +312,17 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
         storage.put(poi)
     for mention in storage.all(POIMention):
         if mention.review_status == "REJECTED":
+            continue
+        if not mention.active:
+            mention.review_reasons = ["SOURCE_CONTENT_UPDATED"]
+            mention.review_status = "NEEDS_REVIEW"
+            storage.put(mention)
+            continue
+        source_content = storage.get(SourceContent, mention.source_content_id)
+        if source_content and source_content.content_status == "UNAVAILABLE":
+            mention.review_reasons = ["SOURCE_UNAVAILABLE"]
+            mention.review_status = "NEEDS_REVIEW"
+            storage.put(mention)
             continue
         poi = storage.get(POI, mention.poi_id) if mention.poi_id else None
         candidate = storage.get(POICandidate, mention.poi_candidate_id) if mention.poi_candidate_id else None

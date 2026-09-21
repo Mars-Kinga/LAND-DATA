@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
-from .adapters import AdapterCapability, MockSourceAdapter
+from .adapters import AdapterCapability, MockSocialAdapter, MockSourceAdapter
 from .auth import MockSessionStore
 from .geoscope import GeoScope
 from .osm import OSMSourceAdapter
@@ -18,6 +18,7 @@ class SourceConfig:
     capability: AdapterCapability
     policy: SourcePolicy
     allow_coordinate_verification: bool = False
+    processing_kind: str = "standard"
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,8 @@ class Config:
             if scope is None:
                 raise ValueError("osm requires --scope")
             return OSMSourceAdapter(scope, categories or ("restaurant", "cafe", "museum"), limit, timeout)
+        if source.processing_kind == "social":
+            return MockSocialAdapter(name, str(self.root / source.fixture), source.capability, sessions)
         return MockSourceAdapter(name, str(self.root / source.fixture), source.capability, sessions)
 
 
@@ -48,6 +51,7 @@ def load_config(root: str) -> Config:
             name=name, fixture=value.get("fixture"),
             capability=AdapterCapability(**value["capability"]),
             allow_coordinate_verification=value.get("allow_coordinate_verification") is True,
+            processing_kind=value.get("processing_kind", "standard"),
             policy=SourcePolicy(
                 raw_fields=tuple(policy["raw_fields"]),
                 normalized_fields=tuple(policy["normalized_fields"]),

@@ -130,12 +130,9 @@ class SQLiteStorage:
                           field_name=item.field_name, source_content_id=item.source_content_id)
         columns = list(values)
         placeholders = ",".join("?" for _ in columns)
-        if model is models.RawSourceRecord:
-            statement = "INSERT OR IGNORE INTO {} ({}) VALUES ({})".format(table, ",".join(columns), placeholders)
-        else:
-            updates = ",".join("{}=excluded.{}".format(key, key) for key in columns if key != "id")
-            statement = "INSERT INTO {} ({}) VALUES ({}) ON CONFLICT(id) DO UPDATE SET {}".format(
-                table, ",".join(columns), placeholders, updates)
+        updates = ",".join("{}=excluded.{}".format(key, key) for key in columns if key != "id")
+        statement = "INSERT INTO {} ({}) VALUES ({}) ON CONFLICT(id) DO UPDATE SET {}".format(
+            table, ",".join(columns), placeholders, updates)
         self.connection.execute(statement, tuple(values.values()))
 
     def put(self, item: object) -> None:
@@ -198,11 +195,21 @@ class SQLiteStorage:
             SELECT s.type, s.value, COUNT(DISTINCT m.source_content_id) AS mentions
             FROM recommendation_signals s
             JOIN poi_mentions m ON m.id=s.poi_mention_id
-            WHERE m.poi_id=? AND m.review_status='AUTO_APPROVED'
+            WHERE m.poi_id=? AND m.review_status='AUTO_APPROVED' AND json_extract(m.data, '$.active') IS NOT 0
             GROUP BY s.type, s.value
             ORDER BY mentions DESC, s.type, s.value
         """, (poi_id,)).fetchall()
         return [dict(row) for row in rows]
+
+    def prune_signals(self, mention_id: str, keep_ids: List[str]) -> None:
+        with self.connection:
+            if keep_ids:
+                placeholders = ",".join("?" for _ in keep_ids)
+                self.connection.execute(
+                    "DELETE FROM recommendation_signals WHERE poi_mention_id=? AND id NOT IN ({})".format(placeholders),
+                    (mention_id, *keep_ids))
+            else:
+                self.connection.execute("DELETE FROM recommendation_signals WHERE poi_mention_id=?", (mention_id,))
 
     def purge_expired_raw(self, now: str) -> int:
         with self.connection:

@@ -9,8 +9,16 @@ from .storage import Storage
 from .util import utc_now
 
 
-def dataset(storage: Storage, config: Config, city: str) -> Dict:
+def dataset(storage: Storage, config: Config, city: str, scope_id: str = None) -> Dict:
     visible = [poi for poi in storage.pois_in_city(city) if poi.map_visibility]
+    if scope_id:
+        contents_by_id = {item.id: item for item in storage.all(SourceContent)}
+        scoped_poi_ids = set()
+        for provenance in storage.all(FieldProvenance):
+            content = contents_by_id.get(provenance.source_content_id)
+            if provenance.entity_type == "POI" and content and content.collection_scope == scope_id:
+                scoped_poi_ids.add(provenance.entity_id)
+        visible = [poi for poi in visible if poi.id in scoped_poi_ids]
     poi_ids = {poi.id for poi in visible}
     osm_ids = {value.entity_id for value in storage.all(FieldProvenance)
                if value.entity_type == "POI" and value.source == "osm"}
@@ -18,9 +26,11 @@ def dataset(storage: Storage, config: Config, city: str) -> Dict:
     signals = storage.all(RecommendationSignal)
     mentions = []
     for mention in storage.all(POIMention):
-        if mention.poi_id not in poi_ids or mention.review_status != "AUTO_APPROVED":
+        if mention.poi_id not in poi_ids or mention.review_status != "AUTO_APPROVED" or not mention.active:
             continue
         source = contents[mention.source_content_id]
+        if source.content_status == "UNAVAILABLE":
+            continue
         policy = config.sources[source.platform].policy
         item = {
             "id": mention.id, "poi_id": mention.poi_id,
@@ -36,6 +46,7 @@ def dataset(storage: Storage, config: Config, city: str) -> Dict:
         mentions.append(item)
     return {
         "schema_version": 1, "city": city, "generated_at": utc_now(),
+        **({"scope": scope_id} if scope_id else {}),
         "source_attributions": ([{"name": "OpenStreetMap", "attribution": "© OpenStreetMap contributors",
                                   "license": "ODbL 1.0", "url": "https://www.openstreetmap.org/copyright"}]
                                 if poi_ids & osm_ids else []),
@@ -51,8 +62,9 @@ def dataset(storage: Storage, config: Config, city: str) -> Dict:
     }
 
 
-def write_dataset(storage: Storage, config: Config, city: str, path: str) -> Dict:
-    output = dataset(storage, config, city)
+def write_dataset(storage: Storage, config: Config, city: str, path: str,
+                  scope_id: str = None) -> Dict:
+    output = dataset(storage, config, city, scope_id)
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

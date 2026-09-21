@@ -24,6 +24,8 @@ REASON_EXPLANATIONS = {
     "REJECTED_CANDIDATE": "The candidate linked to this mention was rejected.",
     "HUMAN_REJECTED": "A local reviewer rejected this item.",
     "UNKNOWN_CATEGORY": "The source tags do not map to a supported category.",
+    "SOURCE_UNAVAILABLE": "The source content is unavailable and its recommendation cannot be published.",
+    "SOURCE_CONTENT_UPDATED": "The updated source no longer supports this recommendation.",
 }
 
 SECRET_PATTERN = re.compile(

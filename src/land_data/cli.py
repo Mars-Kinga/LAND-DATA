@@ -80,9 +80,9 @@ def main(argv=None) -> int:
             pipeline = Pipeline(storage, config)
             if args.command in ("collect", "pipeline"):
                 names = args.source or (["osm"] if scope else
-                                        [name for name in config.sources if name != "osm"])
-                if ("osm" in names) != (scope is not None) or (scope and names != ["osm"]):
-                    raise ValueError("OSM requires --scope and cannot be mixed with mock sources")
+                                        [name for name in config.sources if name not in ("osm", "mock-social-2c")])
+                if ("osm" in names and not scope) or (scope and len(names) != 1):
+                    raise ValueError("scoped collection requires one source; OSM requires --scope")
                 for name in names:
                     if name not in config.sources:
                         raise ValueError("unknown source: {}".format(name))
@@ -96,7 +96,8 @@ def main(argv=None) -> int:
                     if scope:
                         result["scope"] = run_key
                     result["export"] = args.output or str(config.root / ".local" / "exports" / (run_key + ".json"))
-                    write_dataset(storage, config, export_city, result["export"])
+                    write_dataset(storage, config, export_city, result["export"],
+                                  scope_id=scope.name if scope else None)
             elif args.command == "parse":
                 result = {"parsed": pipeline.parse(run_key)}
             elif args.command == "validate":
@@ -122,7 +123,8 @@ def main(argv=None) -> int:
             else:
                 path = args.output or str(config.root / ".local" / "exports" / (run_key + ".json"))
                 export_city = scope.city or scope.name if scope else args.city
-                output = write_dataset(storage, config, export_city, path)
+                output = write_dataset(storage, config, export_city, path,
+                                       scope_id=scope.name if scope else None)
                 result = {"output": path, "pois": len(output["pois"]), "mentions": len(output["mentions"])}
             print(json.dumps(result, ensure_ascii=False, sort_keys=True))
             return 0

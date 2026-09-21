@@ -1,0 +1,9 @@
+{
+  "elements": [
+    {"type": "node", "id": 91001, "lat": 0.0001, "lon": 0.0001, "tags": {"name": "Example Rooftop", "amenity": "restaurant"}},
+    {"type": "node", "id": 91002, "lat": 0.0002, "lon": 0.0002, "tags": {"name": "Example Matcha Cafe", "amenity": "cafe"}},
+    {"type": "node", "id": 91003, "lat": 0.0003, "lon": 0.0003, "tags": {"name": "Cafe A", "amenity": "cafe"}},
+    {"type": "node", "id": 91004, "lat": 0.0004, "lon": 0.0004, "tags": {"name": "Bar B", "amenity": "restaurant"}},
+    {"type": "node", "id": 91005, "lat": 0.0005, "lon": 0.0005, "tags": {"name": "Example Gallery", "tourism": "museum"}}
+  ]
+}

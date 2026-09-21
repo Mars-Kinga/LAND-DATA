@@ -42,6 +42,7 @@ def parse_element(element, scope):
                 "coordinate_verified": latitude is not None and longitude is not None,
                 "name_locale": "und", "address": tags.get("addr:full", ""),
                 "website": tags.get("website", tags.get("contact:website", "")),
+                "opening_hours": tags.get("opening_hours", ""),
                 "osm_tags": tags, "evidence": [
                     {"type": "OSM_OBJECT", "raw_value": external_id, "confidence": 0.92},
                     *([{"type": "OSM_COORDINATES", "raw_value": "{},{}".format(latitude, longitude),
