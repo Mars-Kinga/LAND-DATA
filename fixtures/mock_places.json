@@ -27,6 +27,54 @@
           }
         ]
       }
+    },
+    {
+      "city": "mock-review-city",
+      "external_id": "review-place-east",
+      "source_url": "https://example.invalid/places/review-east",
+      "payload": {
+        "content_type": "PLACE_RECORD",
+        "title": "Evening Rooftop East",
+        "text": "Synthetic place A for human review tests.",
+        "source_kind": "structured",
+        "locations": [{
+          "name": "Evening Rooftop East",
+          "name_locale": "en",
+          "aliases": ["Evening Rooftop"],
+          "address": "Synthetic East Block",
+          "city": "mock-review-city",
+          "country": "ZZ",
+          "category": "food",
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "coordinate_verified": true,
+          "evidence": [{"type": "MANUAL", "raw_value": "synthetic East fixture", "confidence": 0.95}]
+        }]
+      }
+    },
+    {
+      "city": "mock-review-city",
+      "external_id": "review-place-west",
+      "source_url": "https://example.invalid/places/review-west",
+      "payload": {
+        "content_type": "PLACE_RECORD",
+        "title": "Evening Rooftop West",
+        "text": "Synthetic place B for human review tests.",
+        "source_kind": "structured",
+        "locations": [{
+          "name": "Evening Rooftop West",
+          "name_locale": "en",
+          "aliases": ["Evening Rooftop"],
+          "address": "Synthetic West Block",
+          "city": "mock-review-city",
+          "country": "ZZ",
+          "category": "food",
+          "latitude": 0.0004,
+          "longitude": 0.0004,
+          "coordinate_verified": true,
+          "evidence": [{"type": "MANUAL", "raw_value": "synthetic West fixture", "confidence": 0.95}]
+        }]
+      }
     }
   ]
 }

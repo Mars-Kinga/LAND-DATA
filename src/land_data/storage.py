@@ -1,7 +1,7 @@
 """The only persistence contract used by pipeline and export code."""
-from typing import List, Optional, Protocol, Type, TypeVar
+from typing import List, Optional, Protocol, Sequence, Type, TypeVar
 
-from .models import POI
+from .models import POI, ReviewDecision
 
 T = TypeVar("T")
 
@@ -18,3 +18,8 @@ class Storage(Protocol):
     def recommendation_counts(self, poi_id: str) -> List[dict]: ...
 
     def purge_expired_raw(self, now: str) -> int: ...
+
+    def apply_review(self, items: List[object], decision: ReviewDecision,
+                     related_decisions: Sequence[ReviewDecision] = ()) -> None: ...
+
+    def review_history(self, target_type: str, target_id: str) -> List[ReviewDecision]: ...

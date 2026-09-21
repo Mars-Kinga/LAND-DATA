@@ -126,6 +126,25 @@ def valid_coordinates(latitude: Optional[float], longitude: Optional[float]) -> 
             -90 <= latitude <= 90 and -180 <= longitude <= 180)
 
 
+def possible_poi_matches(storage: Storage, candidate: POICandidate) -> List[dict]:
+    """Name/alias matches in the same city, with distance exposed for review."""
+    results = []
+    for poi in storage.pois_in_city(candidate.city):
+        if poi.country != candidate.country or poi.category != candidate.category:
+            continue
+        names = list(poi.names.values()) + poi.aliases
+        if normalized_name(candidate.name) not in {normalized_name(name) for name in names}:
+            continue
+        distance = None
+        if valid_coordinates(candidate.latitude, candidate.longitude):
+            distance = round(distance_meters(candidate.latitude, candidate.longitude,
+                                             poi.latitude, poi.longitude), 1)
+        results.append({"poi": poi, "distance_meters": distance,
+                        "within_250m": distance is None or distance <= 250})
+    return sorted(results, key=lambda match: (match["distance_meters"] is None,
+                                               match["distance_meters"] or 0, match["poi"].id))
+
+
 def resolve(storage: Storage) -> None:
     candidates = sorted(storage.all(POICandidate), key=lambda value: (value.source_kind != "structured", value.id))
     for candidate in candidates:
@@ -135,30 +154,20 @@ def resolve(storage: Storage) -> None:
             continue
         if (candidate.latitude is None) != (candidate.longitude is None) or (
             candidate.latitude is not None and not valid_coordinates(candidate.latitude, candidate.longitude)):
-            candidate.review_reasons = ["invalid_coordinates"]
+            candidate.review_reasons = ["INVALID_COORDINATES"]
             storage.put(candidate)
             continue
-        matches: List[POI] = []
-        coordinate_conflicts = False
-        for poi in storage.pois_in_city(candidate.city):
-            if poi.country != candidate.country or poi.category != candidate.category:
-                continue
-            names = list(poi.names.values()) + poi.aliases
-            if normalized_name(candidate.name) not in {normalized_name(name) for name in names}:
-                continue
-            if candidate.latitude is not None:
-                if distance_meters(candidate.latitude, candidate.longitude, poi.latitude, poi.longitude) > 250:
-                    coordinate_conflicts = True
-                    continue
-            matches.append(poi)
+        possibilities = possible_poi_matches(storage, candidate)
+        matches = [match["poi"] for match in possibilities if match["within_250m"]]
+        coordinate_conflicts = any(not match["within_250m"] for match in possibilities)
         if len(matches) == 1:
             candidate.resolved_poi_id = matches[0].id
             candidate.review_status = "AUTO_APPROVED"
             candidate.review_reasons = []
         elif len(matches) > 1:
-            candidate.review_reasons = ["ambiguous_poi_match"]
+            candidate.review_reasons = ["AMBIGUOUS_POI_MATCH"]
         elif coordinate_conflicts:
-            candidate.review_reasons = ["conflicting_coordinates"]
+            candidate.review_reasons = ["CONFLICTING_COORDINATES"]
         elif (candidate.source_kind == "structured" and candidate.coordinate_verified and
               valid_coordinates(candidate.latitude, candidate.longitude) and candidate.confidence_score >= 0.8):
             poi_id = stable_id("poi", candidate.id)
@@ -182,7 +191,7 @@ def resolve(storage: Storage) -> None:
             candidate.review_status = "AUTO_APPROVED"
             candidate.review_reasons = []
         else:
-            candidate.review_reasons = ["insufficient_evidence"]
+            candidate.review_reasons = ["INSUFFICIENT_LOCATION_EVIDENCE"]
         storage.put(candidate)
         if candidate.resolved_poi_id:
             for mention in storage.all(POIMention):
@@ -200,7 +209,9 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
         poi.validation_passed = valid_coordinates(poi.latitude, poi.longitude) and bool(poi.names) and bool(poi.city)
         poi.quality_score = round(min(1.0, poi.confidence_score * (1.0 if poi.address else 0.9)), 3)
         if poi.review_status != "REJECTED":
-            poi.review_reasons = [] if poi.validation_passed else ["invalid_poi"]
+            poi.review_reasons = [] if poi.validation_passed else [
+                "INVALID_COORDINATES" if not valid_coordinates(poi.latitude, poi.longitude)
+                else "MISSING_REQUIRED_FIELD"]
             poi.review_status = "AUTO_APPROVED" if poi.validation_passed and poi.coordinates_verified else "NEEDS_REVIEW"
         poi.map_visibility = (poi.validation_passed and poi.coordinates_verified and poi.active and
                               poi.review_status == "AUTO_APPROVED" and poi.confidence_score >= visibility_threshold)
@@ -211,9 +222,14 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
         poi = storage.get(POI, mention.poi_id) if mention.poi_id else None
         candidate = storage.get(POICandidate, mention.poi_candidate_id) if mention.poi_candidate_id else None
         if candidate and candidate.review_status == "REJECTED":
-            mention.review_reasons = ["rejected_candidate"]
+            mention.review_reasons = ["REJECTED_CANDIDATE"]
         else:
-            mention.review_reasons = [] if poi and mention.confidence_score >= 0.7 else ["unresolved_or_weak_evidence"]
+            history = storage.review_history("POIMention", mention.id)
+            human_approved = bool(history and history[-1].action == "APPROVE" and
+                                  history[-1].new_status == "AUTO_APPROVED")
+            mention.review_reasons = (
+                [] if poi and (mention.confidence_score >= 0.7 or human_approved)
+                else ["UNRESOLVED_POI" if not poi else "LOW_CONFIDENCE"])
         mention.review_status = "AUTO_APPROVED" if not mention.review_reasons else "NEEDS_REVIEW"
         storage.put(mention)
     for candidate in storage.all(EventCandidate):
@@ -226,4 +242,4 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
                               venue_poi_id=venue.resolved_poi_id if venue else None,
                               created_at=previous_event.created_at if previous_event else candidate.created_at,
                               review_status=previous_event.review_status if previous_event else "NEEDS_REVIEW",
-                              review_reasons=previous_event.review_reasons if previous_event else ["event_requires_review"]))
+                              review_reasons=previous_event.review_reasons if previous_event else ["EVENT_REQUIRES_REVIEW"]))

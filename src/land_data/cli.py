@@ -2,12 +2,14 @@
 import argparse
 import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 from .auth import AuthRequired, MockSessionStore
 from .config import load_config
 from .export import write_dataset
 from .pipeline import Pipeline
+from .review import ReviewService
 from .sqlite_storage import SQLiteStorage
 
 
@@ -20,7 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     for name in ("auth", "auth-status"):
         command = commands.add_parser(name)
         command.add_argument("source")
-    for name in ("collect", "parse", "validate", "review", "export", "pipeline"):
+    for name in ("collect", "parse", "validate", "export", "pipeline"):
         command = commands.add_parser(name)
         if name in ("collect", "parse", "export", "pipeline"):
             command.add_argument("--city", required=True)
@@ -28,6 +30,20 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--source", action="append", help="Configured mock source; repeatable")
         if name in ("export", "pipeline"):
             command.add_argument("--output", help="Dataset path")
+    review = commands.add_parser("review")
+    review_commands = review.add_subparsers(dest="review_command")
+    listing = review_commands.add_parser("list")
+    listing.add_argument("--type", choices=("candidate", "mention", "poi"))
+    listing.add_argument("--city")
+    for action in ("show", "history", "approve", "reject", "resolve", "promote"):
+        subcommand = review_commands.add_parser(action)
+        subcommand.add_argument("id")
+        if action == "reject":
+            subcommand.add_argument("--reason", required=True)
+        elif action in ("approve", "resolve", "promote"):
+            subcommand.add_argument("--reason")
+        if action == "resolve":
+            subcommand.add_argument("--poi", required=True)
     return parser
 
 
@@ -68,7 +84,24 @@ def main(argv=None) -> int:
                 pipeline.validate()
                 result = pipeline.counts()
             elif args.command == "review":
-                result = pipeline.review_queue()
+                review = ReviewService(storage, config.visibility_threshold)
+                action = args.review_command or "list"
+                if action == "list":
+                    if getattr(args, "city", None) and args.city not in config.cities:
+                        raise ValueError("unknown city: {}".format(args.city))
+                    result = review.list(getattr(args, "type", None), getattr(args, "city", None))
+                elif action == "show":
+                    result = review.show(args.id)
+                elif action == "history":
+                    result = {"id": args.id, "history": review.history(args.id)}
+                elif action == "approve":
+                    result = asdict(review.approve(args.id, args.reason or "Confirmed by local reviewer"))
+                elif action == "reject":
+                    result = asdict(review.reject(args.id, args.reason))
+                elif action == "resolve":
+                    result = asdict(review.resolve(args.id, args.poi, args.reason or "Matched to existing POI"))
+                else:
+                    result = asdict(review.promote(args.id, args.reason or "Confirmed as a new POI"))
             else:
                 path = args.output or str(config.root / ".local" / "exports" / (args.city + ".json"))
                 output = write_dataset(storage, config, args.city, path)

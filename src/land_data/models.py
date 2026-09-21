@@ -134,7 +134,7 @@ class EventCandidate:
     ends_at: Optional[str] = None
     venue_candidate_id: Optional[str] = None
     review_status: str = "NEEDS_REVIEW"
-    review_reasons: List[str] = field(default_factory=lambda: ["event_requires_review"])
+    review_reasons: List[str] = field(default_factory=lambda: ["EVENT_REQUIRES_REVIEW"])
 
 
 @dataclass
@@ -160,3 +160,17 @@ class FieldProvenance:
     collected_at: str
     source_content_id: Optional[str] = None
     verified_at: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class ReviewDecision:
+    id: str
+    target_type: str
+    target_id: str
+    previous_status: str
+    new_status: str
+    action: str
+    reason: str
+    reviewer: str
+    created_at: str
+    metadata: Dict[str, Any] = field(default_factory=dict)

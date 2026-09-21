@@ -87,6 +87,35 @@
           }
         ]
       }
+    },
+    {
+      "city": "mock-review-city",
+      "external_id": "review-post-123",
+      "source_url": "https://social.example.invalid/posts/review-123",
+      "payload": {
+        "content_type": "SOCIAL_POST",
+        "title": "晚上的 rooftop",
+        "text": "这家 rooftop 晚上 sunset 很漂亮，很适合 date。",
+        "source_kind": "content",
+        "locations": [{
+          "name": "Evening Rooftop",
+          "city": "mock-review-city",
+          "country": "ZZ",
+          "category": "food",
+          "latitude": 0.0002,
+          "longitude": 0.0002,
+          "relation_type": "RECOMMENDATION",
+          "recommendation_summary": "Sunset view, good for a date.",
+          "evidence": [
+            {"type": "AUTHOR_GEO_TAG", "raw_value": "Evening Rooftop", "confidence": 0.88},
+            {"type": "TEXT_EXTRACTED", "raw_value": "rooftop", "confidence": 0.65}
+          ],
+          "recommendation_signals": [
+            {"type": "feature", "value": "sunset", "confidence": 0.91, "evidence_reference": "text:0"},
+            {"type": "good_for", "value": "date", "confidence": 0.83, "evidence_reference": "text:1"}
+          ]
+        }]
+      }
     }
   ]
 }

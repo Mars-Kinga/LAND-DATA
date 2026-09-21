@@ -95,7 +95,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(len(queue["POICandidate"]), 1)
         self.assertEqual(len(queue["POIMention"]), 1)
         self.assertEqual(len(queue["Event"]), 1)
-        self.assertIn("insufficient_evidence", queue["POICandidate"][0]["reasons"])
+        self.assertIn("INSUFFICIENT_LOCATION_EVIDENCE", queue["POICandidate"][0]["reasons"])
 
     def test_map_visibility_requires_all_gates(self):
         self.run_full()
@@ -127,7 +127,7 @@ class PipelineTests(unittest.TestCase):
         self.storage.put(candidate)
         resolve(self.storage)
         self.assertIsNone(self.storage.get(POICandidate, "invalid").resolved_poi_id)
-        self.assertIn("invalid_coordinates", self.storage.get(POICandidate, "invalid").review_reasons)
+        self.assertIn("INVALID_COORDINATES", self.storage.get(POICandidate, "invalid").review_reasons)
 
     def test_conflicting_coordinates_stay_for_review(self):
         self.run_full()
@@ -136,7 +136,7 @@ class PipelineTests(unittest.TestCase):
                                  latitude=35.7, longitude=139.8, confidence_score=0.9)
         self.storage.put(candidate)
         resolve(self.storage)
-        self.assertIn("conflicting_coordinates", self.storage.get(POICandidate, "conflict").review_reasons)
+        self.assertIn("CONFLICTING_COORDINATES", self.storage.get(POICandidate, "conflict").review_reasons)
 
     def test_ambiguous_match_stays_for_review(self):
         self.run_full()
@@ -149,7 +149,7 @@ class PipelineTests(unittest.TestCase):
                                  latitude=original.latitude, longitude=original.longitude)
         self.storage.put(candidate)
         resolve(self.storage)
-        self.assertIn("ambiguous_poi_match", self.storage.get(POICandidate, "ambiguous").review_reasons)
+        self.assertIn("AMBIGUOUS_POI_MATCH", self.storage.get(POICandidate, "ambiguous").review_reasons)
 
     def test_distance_and_coordinate_validation(self):
         self.assertLess(distance_meters(35.0, 139.0, 35.0001, 139.0), 20)

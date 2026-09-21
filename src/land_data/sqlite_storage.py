@@ -3,7 +3,7 @@ import json
 import sqlite3
 from dataclasses import asdict
 from pathlib import Path
-from typing import List, Optional, Type, TypeVar
+from typing import List, Optional, Sequence, Type, TypeVar
 
 from . import models
 
@@ -65,12 +65,22 @@ CREATE TABLE IF NOT EXISTS field_provenance (
  id TEXT PRIMARY KEY, entity_type TEXT NOT NULL, entity_id TEXT NOT NULL,
  field_name TEXT NOT NULL, source_content_id TEXT REFERENCES source_contents(id), data TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS review_decisions (
+ id TEXT PRIMARY KEY, target_type TEXT NOT NULL, target_id TEXT NOT NULL,
+ previous_status TEXT NOT NULL, new_status TEXT NOT NULL, action TEXT NOT NULL,
+ created_at TEXT NOT NULL, data TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS review_decisions_no_update
+ BEFORE UPDATE ON review_decisions BEGIN SELECT RAISE(ABORT, 'review decisions are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS review_decisions_no_delete
+ BEFORE DELETE ON review_decisions BEGIN SELECT RAISE(ABORT, 'review decisions are append-only'); END;
 CREATE INDEX IF NOT EXISTS idx_raw_source ON raw_source_records(source);
 CREATE INDEX IF NOT EXISTS idx_candidates_city ON poi_candidates(city);
 CREATE INDEX IF NOT EXISTS idx_pois_city ON pois(city, map_visibility);
 CREATE INDEX IF NOT EXISTS idx_mentions_poi ON poi_mentions(poi_id, review_status);
 CREATE INDEX IF NOT EXISTS idx_mentions_candidate ON poi_mentions(poi_candidate_id);
 CREATE INDEX IF NOT EXISTS idx_signals_mention ON recommendation_signals(poi_mention_id);
+CREATE INDEX IF NOT EXISTS idx_review_target ON review_decisions(target_type, target_id, created_at);
 """
 
 
@@ -91,7 +101,7 @@ class SQLiteStorage:
     def __exit__(self, *_exc):
         self.close()
 
-    def put(self, item: object) -> None:
+    def _put(self, item: object) -> None:
         model = type(item)
         table = TABLES[model]
         payload = json.dumps(asdict(item), ensure_ascii=False, sort_keys=True)
@@ -126,8 +136,50 @@ class SQLiteStorage:
             updates = ",".join("{}=excluded.{}".format(key, key) for key in columns if key != "id")
             statement = "INSERT INTO {} ({}) VALUES ({}) ON CONFLICT(id) DO UPDATE SET {}".format(
                 table, ",".join(columns), placeholders, updates)
+        self.connection.execute(statement, tuple(values.values()))
+
+    def put(self, item: object) -> None:
         with self.connection:
-            self.connection.execute(statement, tuple(values.values()))
+            self._put(item)
+
+    def apply_review(self, items: List[object], decision: models.ReviewDecision,
+                     related_decisions: Sequence[models.ReviewDecision] = ()) -> None:
+        target_models = {model.__name__: model for model in
+                         (models.POICandidate, models.POIMention, models.POI)}
+        decisions = [decision] + list(related_decisions)
+        with self.connection:
+            for current_decision in decisions:
+                model = target_models.get(current_decision.target_type)
+                if model is None or not any(type(item) is model and item.id == current_decision.target_id for item in items):
+                    raise ValueError("review target must be among changed items")
+                row = self.connection.execute(
+                    "SELECT data FROM {} WHERE id=?".format(TABLES[model]), (current_decision.target_id,)).fetchone()
+                if row is None:
+                    raise ValueError("review target not found")
+                if json.loads(row["data"])["review_status"] != current_decision.previous_status:
+                    raise ValueError("review target changed; reload before deciding")
+                latest = self.connection.execute(
+                    "SELECT action, new_status FROM review_decisions WHERE target_type=? AND target_id=? "
+                    "ORDER BY created_at DESC, id DESC LIMIT 1",
+                    (current_decision.target_type, current_decision.target_id)).fetchone()
+                if latest and latest["action"] == current_decision.action and latest["new_status"] == current_decision.new_status:
+                    raise ValueError("duplicate review operation")
+            for item in items:
+                self._put(item)
+            for current_decision in decisions:
+                self.connection.execute(
+                    "INSERT INTO review_decisions(id,target_type,target_id,previous_status,new_status,action,created_at,data) "
+                    "VALUES(?,?,?,?,?,?,?,?)",
+                    (current_decision.id, current_decision.target_type, current_decision.target_id,
+                     current_decision.previous_status, current_decision.new_status,
+                     current_decision.action, current_decision.created_at,
+                     json.dumps(asdict(current_decision), ensure_ascii=False, sort_keys=True)))
+
+    def review_history(self, target_type: str, target_id: str) -> List[models.ReviewDecision]:
+        rows = self.connection.execute(
+            "SELECT data FROM review_decisions WHERE target_type=? AND target_id=? ORDER BY created_at, id",
+            (target_type, target_id)).fetchall()
+        return [models.ReviewDecision(**json.loads(row["data"])) for row in rows]
 
     def get(self, model: Type[T], item_id: str) -> Optional[T]:
         row = self.connection.execute("SELECT data FROM {} WHERE id=?".format(TABLES[model]), (item_id,)).fetchone()
