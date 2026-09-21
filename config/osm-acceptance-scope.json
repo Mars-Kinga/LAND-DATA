@@ -1,0 +1,7 @@
+{
+  "name": "osm-integration-tokyo-station",
+  "scope_type": "CUSTOM",
+  "country": "JP",
+  "city": "Tokyo",
+  "bbox": [35.6805, 139.766, 35.6825, 139.769]
+}

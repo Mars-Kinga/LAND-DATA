@@ -29,7 +29,7 @@ class ReviewTests(unittest.TestCase):
         self.addCleanup(self.storage.close)
         sessions = MockSessionStore(str(Path(temporary.name) / "session.json"))
         sessions.authenticate("mock-social")
-        adapters = [self.config.adapter(name, sessions) for name in self.config.sources]
+        adapters = [self.config.adapter(name, sessions) for name in self.config.sources if name != "osm"]
         Pipeline(self.storage, self.config).run("mock-review-city", adapters)
         self.review = ReviewService(self.storage, self.config.visibility_threshold)
         self.candidate = next(item for item in self.storage.all(POICandidate)

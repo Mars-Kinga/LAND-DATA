@@ -1,6 +1,6 @@
 # LAND-Data
 
-LAND 的独立地点与推荐数据基础设施。当前完成第二阶段 2A Human Review System，**仅处理虚构 Mock 数据**。不采集真实城市、不连接社交平台、不登录真实账号、不调用 LLM，也不修改相邻的 LAND iOS 项目。
+LAND 的独立地点与推荐数据基础设施。第二阶段 2B 增加一个限量的 OpenStreetMap / Overpass 结构化来源，供独立集成验证。社交来源仍仅使用虚构 Mock 数据；不登录真实账号、不调用 LLM，也不修改相邻的 LAND iOS 项目。
 
 ## 运行
 
@@ -27,6 +27,26 @@ LAND 的独立地点与推荐数据基础设施。当前完成第二阶段 2A Hu
 ```
 
 `pipeline` 顺序执行 collect、parse、基础匹配与验证、评分和审核，再导出。`collect` 单独运行只写 Raw；`parse` 可从仍在保留期内的 Raw 重建 Normalized 与 Derived。`validate` 可重新匹配 Candidate 并计算审核状态和地图可见性。`review` 等同于 `review list`。
+
+## 受限 OSM 集成（第二阶段 2B）
+
+`config/osm-acceptance-scope.json` 是**仅供集成验证**的东京站附近 bbox，不是产品默认城市。它将采集范围的 `name` 与 POI metadata 的 `city` 分开；GeoScope 保存 `scope_type`、国家、bbox，以及可选的中心和半径。当前 OSM Adapter 只查询 bbox，提供中心/半径时会明确报错，避免悄悄忽略范围条件。请求限制为 bbox 每轴至多 0.02°、结果最多 30 条、超时 2–30 秒，仅允许 restaurant/cafe/museum。默认上限为 20 条、15 秒。一次请求、最多一次轻量重试，无并发。
+
+使用单独的数据库，便于比较各层结果：
+
+```sh
+./land-data --db .local/osm-acceptance.db collect --source osm --scope config/osm-acceptance-scope.json --limit 20 --timeout 15 --category cafe --category restaurant --category museum
+./land-data --db .local/osm-acceptance.db parse --scope config/osm-acceptance-scope.json
+./land-data --db .local/osm-acceptance.db validate
+./land-data --db .local/osm-acceptance.db review list --city Tokyo
+./land-data --db .local/osm-acceptance.db export --scope config/osm-acceptance-scope.json --output .local/exports/osm-acceptance.json
+```
+
+也可以使用 `pipeline --source osm --scope ...` 一次运行完整链路。重复执行相同范围可以检查幂等性。OSM 不需要 `auth`。不传 `--source` 与 `--scope` 时，原有 Mock CLI 行为保持不变；OSM 与 Mock 来源不可在同一次 collect/pipeline 混用。`--scope` 的 `name` 用于 Raw 采集与 parse 筛选，`city` 用于 POI 元数据与现有按城市导出；同一数据库里多个 scope 共享同一城市时，导出会包含该城市的全部可见 POI。
+
+2026-09-21 的受限真实验收：同一 bbox 返回 10 个 OSM 对象。第一次完成 collect、parse、validate、export 后有 10 Raw、10 SourceContent、10 Candidate、10 POI、47 条字段来源，10 个 POI 均为 `AUTO_APPROVED` 且可见，导出 10 个。第二次用同样的 bbox、类别、20 条上限和 15 秒超时执行完整 `pipeline` 后，四层数量、来源数量与导出 POI ID 集合均未变化。本机 Python 3.9 的默认 CA 路径不存在，实际请求使用 `SSL_CERT_FILE=/etc/ssl/cert.pem` 指向系统 CA，TLS 校验始终开启；若系统 Python 已有可信 CA，无需设置该变量。一次服务端读取超时由 Adapter 的单次轻量重试处理。
+
+OSM 对象身份由 `node/way/relation` 和对象 ID 组成；SourceContent 稳定去重，未变化的 Raw 快照也不会重复存储。Raw 保留对象类型、ID、必要 tags、坐标及采集时间，不存整份 Overpass 响应。仅在名称、有效坐标、受支持类别和可信结构化证据齐全时才自动创建 POI；缺少必要字段或类别未知的 Candidate 进入审核并保留原 tags。字段级 FieldProvenance 保存 OSM 来源内容引用及 `tags.name`、`tags.amenity`、`tags.website`、`lat` 或 `center.lat` 等路径。可见 OSM POI 的导出附带 OpenStreetMap / ODbL 署名信息；对外使用该数据时仍须遵守 [OSM 署名与许可要求](https://www.openstreetmap.org/copyright)。
 
 测试：
 
@@ -115,6 +135,8 @@ src/land_data/
   adapters.py            Adapter 接口、能力声明及 Mock Adapter
   auth.py                Mock Session / AUTH_REQUIRED
   models.py              核心数据模型
+  geoscope.py            采集范围与 bbox 校验
+  osm.py                 单一受限 Overpass Adapter、响应解析与类别映射
   policy.py              字段 allowlist、保留期限和敏感字段过滤
   storage.py             Pipeline 使用的 Storage 接口
   sqlite_storage.py      SQLite 表与唯一 SQL 实现
@@ -133,4 +155,5 @@ tests/                  自动化测试
 - 匹配算法仅适合基础精确场景；同名地点、多语言变体和复杂坐标冲突需要后续审核与算法改进。
 - 当前仅有本机 `local-user`，没有多用户并发锁、权限系统或撤销/合并审核工作流。
 - 机器原因码覆盖当前基础规则；跨来源冲突检测与复杂同名实体匹配仍待后续阶段。
+- OSM 只支持少数确定性类别、bbox 查询和小样本采集；Way/Relation 使用 Overpass 返回的几何中心，中心可能不在多边形内。当前导出仍按 POI.city 筛选，未实现 scope 级导出隔离。来源数据变化后已解析 POI 的字段同步与历史版本治理未在 2B 实现。
 - 当前导出是 LAND-Data 的独立 schema；LAND iOS 现有 `Place` 契约没有 Mention/Signal 列表，接入需要单独设计并经确认。

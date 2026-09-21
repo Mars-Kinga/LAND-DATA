@@ -72,6 +72,8 @@ class POICandidate:
     name_locale: str = "und"
     aliases: List[str] = field(default_factory=list)
     address: str = ""
+    website: str = ""
+    source_tags: Dict[str, str] = field(default_factory=dict)
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     source_kind: str = "content"
@@ -160,6 +162,7 @@ class FieldProvenance:
     collected_at: str
     source_content_id: Optional[str] = None
     verified_at: Optional[str] = None
+    source_field: Optional[str] = None
 
 
 @dataclass(frozen=True)

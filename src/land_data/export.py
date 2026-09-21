@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict
 
 from .config import Config
-from .models import POI, POIMention, RecommendationSignal, SourceContent
+from .models import FieldProvenance, POI, POIMention, RecommendationSignal, SourceContent
 from .storage import Storage
 from .util import utc_now
 
@@ -12,6 +12,8 @@ from .util import utc_now
 def dataset(storage: Storage, config: Config, city: str) -> Dict:
     visible = [poi for poi in storage.pois_in_city(city) if poi.map_visibility]
     poi_ids = {poi.id for poi in visible}
+    osm_ids = {value.entity_id for value in storage.all(FieldProvenance)
+               if value.entity_type == "POI" and value.source == "osm"}
     contents = {content.id: content for content in storage.all(SourceContent)}
     signals = storage.all(RecommendationSignal)
     mentions = []
@@ -34,9 +36,13 @@ def dataset(storage: Storage, config: Config, city: str) -> Dict:
         mentions.append(item)
     return {
         "schema_version": 1, "city": city, "generated_at": utc_now(),
+        "source_attributions": ([{"name": "OpenStreetMap", "attribution": "© OpenStreetMap contributors",
+                                  "license": "ODbL 1.0", "url": "https://www.openstreetmap.org/copyright"}]
+                                if poi_ids & osm_ids else []),
         "pois": [{"id": poi.id, "names": poi.names, "aliases": poi.aliases,
                   "latitude": poi.latitude, "longitude": poi.longitude,
                   "address": poi.address, "category": poi.category,
+                  **({"website": poi.website} if poi.website else {}),
                   "subcategory": poi.subcategory, "tags": poi.tags,
                   "confidence_score": poi.confidence_score, "quality_score": poi.quality_score,
                   "last_verified_at": poi.last_verified_at,

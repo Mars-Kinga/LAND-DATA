@@ -23,6 +23,7 @@ REASON_EXPLANATIONS = {
     "UNRESOLVED_POI": "The mention is still linked only to a candidate.",
     "REJECTED_CANDIDATE": "The candidate linked to this mention was rejected.",
     "HUMAN_REJECTED": "A local reviewer rejected this item.",
+    "UNKNOWN_CATEGORY": "The source tags do not map to a supported category.",
 }
 
 SECRET_PATTERN = re.compile(
@@ -230,6 +231,8 @@ class ReviewService:
             raise ValueError("candidate is already resolved")
         if candidate.review_status == "REJECTED":
             raise ValueError("rejected candidate cannot be resolved")
+        if candidate.category == "unknown":
+            raise ValueError("UNKNOWN_CATEGORY: candidate category requires correction before resolution")
         if (candidate.city, candidate.country, candidate.category) != (poi.city, poi.country, poi.category):
             raise ValueError("POI city, country or category does not match candidate")
         now = utc_now()
@@ -272,6 +275,8 @@ class ReviewService:
             raise ValueError("candidate is already resolved")
         if candidate.review_status == "REJECTED":
             raise ValueError("rejected candidate cannot be promoted")
+        if candidate.category == "unknown":
+            raise ValueError("UNKNOWN_CATEGORY: candidate category requires correction before promotion")
         if not (candidate.name.strip() and candidate.city.strip() and candidate.country.strip() and
                 candidate.category.strip()):
             raise ValueError("MISSING_REQUIRED_FIELD: candidate name, city, country or category")
@@ -284,6 +289,7 @@ class ReviewService:
         content = self.storage.get(SourceContent, candidate.source_content_id)
         poi = POI(id=poi_id, names={candidate.name_locale: candidate.name}, aliases=candidate.aliases,
                   latitude=candidate.latitude, longitude=candidate.longitude, address=candidate.address,
+                  website=candidate.website,
                   city=candidate.city, country=candidate.country, category=candidate.category,
                   created_at=now, updated_at=now, last_verified_at=now,
                   confidence_score=max(candidate.confidence_score, self.visibility_threshold),
@@ -310,12 +316,22 @@ class ReviewService:
             if evidence.poi_candidate_id == candidate_id:
                 evidence.matched_poi_id = poi_id
                 items.append(evidence)
-        for field_name in ("names", "latitude", "longitude", "address", "category"):
+        fields = ["names", "latitude", "longitude", "address", "category"]
+        if candidate.website:
+            fields.append("website")
+        geometry_prefix = "center." if content.raw_metadata.get("osm_object_type") in ("way", "relation") else ""
+        origin = {"names": "tags.name", "latitude": geometry_prefix + "lat",
+                  "longitude": geometry_prefix + "lon",
+                  "category": "tags.amenity" if "amenity" in candidate.source_tags else "tags.tourism",
+                  "address": "tags.addr:full",
+                  "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website"}
+        for field_name in fields:
             items.append(FieldProvenance(
                 id=stable_id("provenance", poi_id, field_name, content.id),
                 entity_type="POI", entity_id=poi_id, field_name=field_name,
                 source=content.platform, collected_at=content.collected_at,
-                source_content_id=content.id, verified_at=now))
+                source_content_id=content.id, verified_at=now,
+                source_field=origin[field_name] if content.platform == "osm" else None))
         self.storage.apply_review(items, decision, related_decisions)
         validate_score_review(self.storage, self.visibility_threshold)
         return decision

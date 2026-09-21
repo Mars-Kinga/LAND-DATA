@@ -12,7 +12,8 @@ from .util import normalize_url, normalized_name, stable_id, utc_now
 
 def normalize(record: RawSourceRecord, policy: SourcePolicy) -> SourceContent:
     data = {key: record.payload[key] for key in policy.normalized_fields if key in record.payload}
-    metadata = {key: data[key] for key in ("locations", "events", "source_kind") if key in data}
+    metadata = {key: data[key] for key in ("locations", "events", "source_kind",
+                                          "osm_object_type", "osm_object_id") if key in data}
     if "locations" in metadata:
         metadata["locations"] = [
             {key: value for key, value in location.items()
@@ -51,6 +52,8 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
             id=candidate_id, source_content_id=content.id, name=str(location["name"]),
             name_locale=str(location.get("name_locale", "und")),
             aliases=list(location.get("aliases", [])), address=str(location.get("address", "")),
+            website=str(location.get("website", "")),
+            source_tags=dict(location.get("osm_tags", {})),
             city=str(location["city"]), country=str(location["country"]),
             category=str(location.get("category", "other")), created_at=now,
             latitude=location.get("latitude"), longitude=location.get("longitude"),
@@ -152,6 +155,19 @@ def resolve(storage: Storage) -> None:
             continue
         if candidate.resolved_poi_id:
             continue
+        if not candidate.name.strip() or not candidate.city.strip() or not candidate.country.strip():
+            candidate.review_reasons = ["MISSING_REQUIRED_FIELD"]
+            storage.put(candidate)
+            continue
+        if candidate.category == "unknown":
+            candidate.review_reasons = ["UNKNOWN_CATEGORY"]
+            storage.put(candidate)
+            continue
+        if candidate.source_kind == "structured" and not valid_coordinates(candidate.latitude, candidate.longitude):
+            candidate.review_reasons = ["MISSING_REQUIRED_FIELD" if candidate.latitude is None or candidate.longitude is None
+                                        else "INVALID_COORDINATES"]
+            storage.put(candidate)
+            continue
         if (candidate.latitude is None) != (candidate.longitude is None) or (
             candidate.latitude is not None and not valid_coordinates(candidate.latitude, candidate.longitude)):
             candidate.review_reasons = ["INVALID_COORDINATES"]
@@ -177,16 +193,30 @@ def resolve(storage: Storage) -> None:
                 latitude=candidate.latitude, longitude=candidate.longitude,
                 address=candidate.address, city=candidate.city, country=candidate.country,
                 category=candidate.category, created_at=now, updated_at=now,
+                website=candidate.website,
                 last_verified_at=now, confidence_score=candidate.confidence_score,
                 coordinates_verified=True))
             source_content = storage.get(SourceContent, candidate.source_content_id)
-            for field_name in ("names", "latitude", "longitude", "address", "category"):
+            fields = ["names", "latitude", "longitude", "category"]
+            if candidate.address:
+                fields.append("address")
+            if candidate.website:
+                fields.append("website")
+            tag_key = "amenity" if "amenity" in candidate.source_tags else "tourism"
+            geometry_prefix = ("center." if source_content.raw_metadata.get("osm_object_type") != "node"
+                               else "")
+            origin = {"names": "tags.name", "latitude": geometry_prefix + "lat",
+                      "longitude": geometry_prefix + "lon", "category": "tags." + tag_key,
+                      "address": "tags.addr:full",
+                      "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website"}
+            for field_name in fields:
                 storage.put(FieldProvenance(
                     id=stable_id("provenance", poi_id, field_name, candidate.source_content_id),
                     entity_type="POI", entity_id=poi_id, field_name=field_name,
                     source=source_content.platform,
                     source_content_id=candidate.source_content_id,
-                    collected_at=source_content.collected_at, verified_at=now))
+                    collected_at=source_content.collected_at, verified_at=now,
+                    source_field=origin[field_name] if source_content.platform == "osm" else None))
             candidate.resolved_poi_id = poi_id
             candidate.review_status = "AUTO_APPROVED"
             candidate.review_reasons = []

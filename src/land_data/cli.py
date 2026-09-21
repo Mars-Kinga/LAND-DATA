@@ -8,6 +8,7 @@ from pathlib import Path
 from .auth import AuthRequired, MockSessionStore
 from .config import load_config
 from .export import write_dataset
+from .geoscope import load_scope
 from .pipeline import Pipeline
 from .review import ReviewService
 from .sqlite_storage import SQLiteStorage
@@ -25,9 +26,13 @@ def build_parser() -> argparse.ArgumentParser:
     for name in ("collect", "parse", "validate", "export", "pipeline"):
         command = commands.add_parser(name)
         if name in ("collect", "parse", "export", "pipeline"):
-            command.add_argument("--city", required=True)
+            command.add_argument("--city")
+            command.add_argument("--scope", help="JSON GeoScope file for bounded OSM collection")
         if name in ("collect", "pipeline"):
-            command.add_argument("--source", action="append", help="Configured mock source; repeatable")
+            command.add_argument("--source", action="append", help="Configured source; repeatable for mock sources")
+            command.add_argument("--limit", type=int, default=20, help="OSM maximum results, at most 30")
+            command.add_argument("--category", action="append", help="OSM restaurant/cafe/museum; repeatable")
+            command.add_argument("--timeout", type=int, default=15, help="OSM request timeout in seconds")
         if name in ("export", "pipeline"):
             command.add_argument("--output", help="Dataset path")
     review = commands.add_parser("review")
@@ -61,25 +66,39 @@ def main(argv=None) -> int:
                 sessions.authenticate(args.source)
             print(sessions.status(args.source))
             return 0
-        if hasattr(args, "city") and args.city not in config.cities:
-            raise ValueError("unknown city: {}".format(args.city))
+        scope = load_scope(args.scope) if getattr(args, "scope", None) else None
+        if args.command in ("collect", "parse", "export", "pipeline"):
+            if scope and args.city:
+                raise ValueError("use either --scope or --city")
+            if not scope and not args.city:
+                raise ValueError("--city or --scope is required")
+            if not scope and args.city not in config.cities:
+                raise ValueError("unknown city: {}".format(args.city))
+        run_key = scope.name if scope else getattr(args, "city", None)
         db_path = args.db or str(config.root / ".local" / "land-data.db")
         with SQLiteStorage(db_path) as storage:
             pipeline = Pipeline(storage, config)
             if args.command in ("collect", "pipeline"):
-                names = args.source or list(config.sources)
+                names = args.source or (["osm"] if scope else
+                                        [name for name in config.sources if name != "osm"])
+                if ("osm" in names) != (scope is not None) or (scope and names != ["osm"]):
+                    raise ValueError("OSM requires --scope and cannot be mixed with mock sources")
                 for name in names:
                     if name not in config.sources:
                         raise ValueError("unknown source: {}".format(name))
-                adapters = [config.adapter(name, sessions) for name in names]
+                adapters = [config.adapter(name, sessions, scope, args.category, args.limit, args.timeout)
+                            for name in names]
                 if args.command == "collect":
-                    result = {"collected": pipeline.collect(args.city, adapters)}
+                    result = {"collected": pipeline.collect(run_key, adapters, scope)}
                 else:
-                    result = pipeline.run(args.city, adapters)
-                    result["export"] = args.output or str(config.root / ".local" / "exports" / (args.city + ".json"))
-                    write_dataset(storage, config, args.city, result["export"])
+                    result = pipeline.run(run_key, adapters, scope)
+                    export_city = scope.city or scope.name if scope else args.city
+                    if scope:
+                        result["scope"] = run_key
+                    result["export"] = args.output or str(config.root / ".local" / "exports" / (run_key + ".json"))
+                    write_dataset(storage, config, export_city, result["export"])
             elif args.command == "parse":
-                result = {"parsed": pipeline.parse(args.city)}
+                result = {"parsed": pipeline.parse(run_key)}
             elif args.command == "validate":
                 pipeline.validate()
                 result = pipeline.counts()
@@ -87,8 +106,6 @@ def main(argv=None) -> int:
                 review = ReviewService(storage, config.visibility_threshold)
                 action = args.review_command or "list"
                 if action == "list":
-                    if getattr(args, "city", None) and args.city not in config.cities:
-                        raise ValueError("unknown city: {}".format(args.city))
                     result = review.list(getattr(args, "type", None), getattr(args, "city", None))
                 elif action == "show":
                     result = review.show(args.id)
@@ -103,8 +120,9 @@ def main(argv=None) -> int:
                 else:
                     result = asdict(review.promote(args.id, args.reason or "Confirmed as a new POI"))
             else:
-                path = args.output or str(config.root / ".local" / "exports" / (args.city + ".json"))
-                output = write_dataset(storage, config, args.city, path)
+                path = args.output or str(config.root / ".local" / "exports" / (run_key + ".json"))
+                export_city = scope.city or scope.name if scope else args.city
+                output = write_dataset(storage, config, export_city, path)
                 result = {"output": path, "pois": len(output["pois"]), "mentions": len(output["mentions"])}
             print(json.dumps(result, ensure_ascii=False, sort_keys=True))
             return 0

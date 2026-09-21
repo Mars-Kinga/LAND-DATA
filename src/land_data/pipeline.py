@@ -3,6 +3,7 @@ from typing import Dict, Iterable, Optional
 
 from .adapters import SourceAdapter
 from .config import Config
+from .geoscope import GeoScope
 from .models import (Event, EventCandidate, LocationEvidence, POI, POICandidate,
                      POIMention, RawSourceRecord, RecommendationSignal, SourceContent)
 from .policy import SourcePolicy
@@ -17,8 +18,11 @@ class Pipeline:
         self.config = config
         self._transient_by_raw_id: Dict[str, Dict] = {}
 
-    def collect(self, city: str, adapters: Iterable[SourceAdapter]) -> int:
-        if city not in self.config.cities:
+    def collect(self, city: str, adapters: Iterable[SourceAdapter],
+                scope: Optional[GeoScope] = None) -> int:
+        if scope is not None and city != scope.name:
+            raise ValueError("collection key must match GeoScope name")
+        if scope is None and city not in self.config.cities:
             raise ValueError("unknown city: {}".format(city))
         self.storage.purge_expired_raw(utc_now())
         count = 0
@@ -48,13 +52,18 @@ class Pipeline:
     def parse(self, city: str) -> int:
         self.storage.purge_expired_raw(utc_now())
         count = 0
+        latest = {}
         for record in self.storage.all(RawSourceRecord):
+            if record.city == city:
+                key = (record.source, record.external_id)
+                if key not in latest or record.collected_at > latest[key].collected_at:
+                    latest[key] = record
+        for record in latest.values():
             if record.source not in self.config.sources:
                 continue
-            if record.city == city:
-                self._parse_one(record, self.config.sources[record.source].policy,
-                                self._transient_by_raw_id.get(record.id))
-                count += 1
+            self._parse_one(record, self.config.sources[record.source].policy,
+                            self._transient_by_raw_id.get(record.id))
+            count += 1
         return count
 
     def validate(self) -> None:
@@ -72,8 +81,9 @@ class Pipeline:
                  RecommendationSignal, LocationEvidence, EventCandidate, Event)
         return {model.__name__: len(self.storage.all(model)) for model in types}
 
-    def run(self, city: str, adapters: Iterable[SourceAdapter]) -> Dict[str, int]:
-        self.collect(city, adapters)
+    def run(self, city: str, adapters: Iterable[SourceAdapter],
+            scope: Optional[GeoScope] = None) -> Dict[str, int]:
+        self.collect(city, adapters, scope)
         self.parse(city)
         self.validate()
         return self.counts()

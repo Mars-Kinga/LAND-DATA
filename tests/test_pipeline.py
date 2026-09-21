@@ -28,7 +28,7 @@ class PipelineTests(unittest.TestCase):
         self.pipeline = Pipeline(self.storage, self.config)
 
     def adapters(self):
-        return [self.config.adapter(name, self.sessions) for name in self.config.sources]
+        return [self.config.adapter(name, self.sessions) for name in self.config.sources if name != "osm"]
 
     def run_full(self):
         self.sessions.authenticate("mock-social")

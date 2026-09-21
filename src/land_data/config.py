@@ -2,17 +2,19 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from .adapters import AdapterCapability, MockSourceAdapter
 from .auth import MockSessionStore
+from .geoscope import GeoScope
+from .osm import OSMSourceAdapter
 from .policy import SourcePolicy
 
 
 @dataclass(frozen=True)
 class SourceConfig:
     name: str
-    fixture: str
+    fixture: Optional[str]
     capability: AdapterCapability
     policy: SourcePolicy
     allow_coordinate_verification: bool = False
@@ -25,8 +27,13 @@ class Config:
     sources: Dict[str, SourceConfig]
     visibility_threshold: float
 
-    def adapter(self, name: str, sessions: MockSessionStore) -> MockSourceAdapter:
+    def adapter(self, name: str, sessions: MockSessionStore, scope: Optional[GeoScope] = None,
+                categories=None, limit=20, timeout=15):
         source = self.sources[name]
+        if name == "osm":
+            if scope is None:
+                raise ValueError("osm requires --scope")
+            return OSMSourceAdapter(scope, categories or ("restaurant", "cafe", "museum"), limit, timeout)
         return MockSourceAdapter(name, str(self.root / source.fixture), source.capability, sessions)
 
 
@@ -38,7 +45,7 @@ def load_config(root: str) -> Config:
     for name, value in source_data["sources"].items():
         policy = value["policy"]
         sources[name] = SourceConfig(
-            name=name, fixture=value["fixture"],
+            name=name, fixture=value.get("fixture"),
             capability=AdapterCapability(**value["capability"]),
             allow_coordinate_verification=value.get("allow_coordinate_verification") is True,
             policy=SourcePolicy(
