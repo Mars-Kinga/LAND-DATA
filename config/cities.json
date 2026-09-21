@@ -1,0 +1,8 @@
+{
+  "mock-tokyo": {
+    "display_name": "Synthetic Tokyo fixture",
+    "country": "JP",
+    "latitude": 35.6812,
+    "longitude": 139.7671
+  }
+}

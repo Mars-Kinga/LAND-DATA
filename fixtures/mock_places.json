@@ -1,0 +1,32 @@
+{
+  "records": [
+    {
+      "city": "mock-tokyo",
+      "external_id": "place-001",
+      "source_url": "https://example.invalid/places/example-rooftop",
+      "payload": {
+        "content_type": "PLACE_RECORD",
+        "title": "Example Rooftop",
+        "text": "Synthetic venue record for tests only.",
+        "source_kind": "structured",
+        "locations": [
+          {
+            "name": "Example Rooftop",
+            "name_locale": "en",
+            "aliases": ["示例露台"],
+            "address": "Synthetic address, mock-tokyo",
+            "city": "mock-tokyo",
+            "country": "JP",
+            "category": "food",
+            "latitude": 35.6812,
+            "longitude": 139.7671,
+            "coordinate_verified": true,
+            "evidence": [
+              {"type": "MANUAL", "raw_value": "synthetic fixture verification", "confidence": 0.95}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "land-data"
+version = "0.1.0"
+description = "Local, mock-first data pipeline for LAND places and recommendations"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+land-data = "land_data.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

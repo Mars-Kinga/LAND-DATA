@@ -1,0 +1,92 @@
+{
+  "records": [
+    {
+      "city": "mock-tokyo",
+      "external_id": "post-001",
+      "source_url": "https://social.example.invalid/posts/001?utm_source=fixture",
+      "payload": {
+        "content_type": "SOCIAL_POST",
+        "title": "An evening above the city",
+        "text": "Example Rooftop has a lovely sunset. Good for a date.",
+        "source_kind": "content",
+        "locations": [
+          {
+            "name": "Example Rooftop",
+            "city": "mock-tokyo",
+            "country": "JP",
+            "category": "food",
+            "latitude": 35.68125,
+            "longitude": 139.76712,
+            "relation_type": "RECOMMENDATION",
+            "recommendation_summary": "Sunset view and date atmosphere.",
+            "evidence": [
+              {"type": "AUTHOR_GEO_TAG", "raw_value": "Example Rooftop", "confidence": 0.88},
+              {"type": "TEXT_EXTRACTED", "raw_value": "Example Rooftop", "confidence": 0.65}
+            ],
+            "recommendation_signals": [
+              {"type": "feature", "value": "sunset", "confidence": 0.9, "evidence_reference": "text:0"},
+              {"type": "good_for", "value": "date", "confidence": 0.8, "evidence_reference": "text:1"}
+            ]
+          }
+        ],
+        "events": [
+          {"name": "Synthetic Autumn Pop-up", "starts_at": "2026-10-01T10:00:00Z", "ends_at": "2026-10-02T18:00:00Z", "venue_index": 0}
+        ]
+      }
+    },
+    {
+      "city": "mock-tokyo",
+      "external_id": "post-002",
+      "source_url": "https://social.example.invalid/posts/002",
+      "payload": {
+        "content_type": "SOCIAL_POST",
+        "title": "Another sunset",
+        "text": "Example Rooftop is beautiful at sunset.",
+        "source_kind": "content",
+        "locations": [
+          {
+            "name": "Example Rooftop",
+            "city": "mock-tokyo",
+            "country": "JP",
+            "category": "food",
+            "relation_type": "RECOMMENDATION",
+            "recommendation_summary": "Beautiful at sunset.",
+            "evidence": [
+              {"type": "AUTHOR_GEO_TAG", "raw_value": "Example Rooftop", "confidence": 0.85}
+            ],
+            "recommendation_signals": [
+              {"type": "feature", "value": "sunset", "confidence": 0.85, "evidence_reference": "text:0"}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "city": "mock-tokyo",
+      "external_id": "post-003",
+      "source_url": "https://social.example.invalid/posts/003",
+      "payload": {
+        "content_type": "SOCIAL_POST",
+        "title": "A quiet rooftop",
+        "text": "This unnamed rooftop has great cocktails.",
+        "source_kind": "content",
+        "locations": [
+          {
+            "name": "Unknown Rooftop",
+            "city": "mock-tokyo",
+            "country": "JP",
+            "category": "food",
+            "relation_type": "RECOMMENDATION",
+            "recommendation_summary": "Cocktails on a rooftop.",
+            "evidence": [
+              {"type": "TEXT_EXTRACTED", "raw_value": "unnamed rooftop", "confidence": 0.4}
+            ],
+            "recommendation_signals": [
+              {"type": "feature", "value": "cocktails", "confidence": 0.6, "evidence_reference": "text:0"}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

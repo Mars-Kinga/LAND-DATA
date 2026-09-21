@@ -1,0 +1,17 @@
+.local/
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite*
+*.session*
+*cookie*
+*token*
+secrets/
+sessions/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+dist/
+build/

@@ -1,0 +1,41 @@
+{
+  "visibility_threshold": 0.8,
+  "sources": {
+    "mock-places": {
+      "fixture": "fixtures/mock_places.json",
+      "allow_coordinate_verification": true,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_geo_tag": true,
+        "supports_search": false,
+        "supports_content_text": true,
+        "supports_media_metadata": false
+      },
+      "policy": {
+        "raw_fields": ["content_type", "title", "text", "source_kind", "locations"],
+        "normalized_fields": ["content_type", "title", "text", "source_kind", "locations"],
+        "temporary_fields": [],
+        "export_fields": ["source_url"],
+        "retention_days": 30
+      }
+    },
+    "mock-social": {
+      "fixture": "fixtures/mock_social.json",
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "AUTHENTICATED",
+        "supports_geo_tag": true,
+        "supports_search": false,
+        "supports_content_text": true,
+        "supports_media_metadata": false
+      },
+      "policy": {
+        "raw_fields": ["content_type", "title", "text", "source_kind", "locations", "events"],
+        "normalized_fields": ["content_type", "title", "text", "source_kind", "locations", "events"],
+        "temporary_fields": [],
+        "export_fields": ["source_url", "recommendation_summary", "recommendation_signals"],
+        "retention_days": 7
+      }
+    }
+  }
+}
