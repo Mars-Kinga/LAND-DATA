@@ -28,7 +28,9 @@ class PipelineTests(unittest.TestCase):
         self.pipeline = Pipeline(self.storage, self.config)
 
     def adapters(self):
-        return [self.config.adapter(name, self.sessions) for name in self.config.sources if name != "osm"]
+        return [self.config.adapter(name, self.sessions) for name in self.config.sources
+                if name not in ("osm", "threads", "official-directory", "nyc-open-data-restaurants",
+                                "jfk-arrival-guidance", "nyc-parks-events", "xiaohongshu-browser")]
 
     def run_full(self):
         self.sessions.authenticate("mock-social")
@@ -43,7 +45,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(counts["RecommendationSignal"], 4)
         self.assertEqual(counts["LocationEvidence"], 5)
         self.assertEqual(counts["Event"], 1)
-        self.assertEqual(len(self.storage.all(FieldProvenance)), 5)
+        self.assertEqual(len(self.storage.all(FieldProvenance)), 6)
 
     def test_raw_normalized_and_derived_are_separate(self):
         self.run_full()

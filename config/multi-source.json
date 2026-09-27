@@ -1,0 +1,53 @@
+{
+  "sources": [
+    {
+      "name": "nyc-open-data-restaurants",
+      "enabled": true,
+      "city": "new-york",
+      "auto_collect": true,
+      "collection_key": "new-york",
+      "borough": "Manhattan",
+      "limit": 100,
+      "max_pages": 20,
+      "initial_updated_at": "2026-09-01T00:00:00.000",
+      "timeout": 15,
+      "safety_rescan_days": 7
+    },
+    {
+      "name": "osm",
+      "enabled": true,
+      "city": "new-york",
+      "auto_collect": true,
+      "collection_key": "nyc-jfk-arrival",
+      "scope": "config/nyc-jfk-arrival-scope.json",
+      "categories": ["cafe", "restaurant"],
+      "limit": 10,
+      "timeout": 15,
+      "endpoints": [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter"
+      ],
+      "max_retries": 2
+    },
+    {
+      "name": "jfk-arrival-guidance",
+      "enabled": true,
+      "city": "new-york",
+      "auto_collect": false,
+      "collection_key": "nyc-jfk-arrival-guidance",
+      "limit": 3,
+      "timeout": 15
+    },
+    {
+      "name": "nyc-parks-events",
+      "enabled": true,
+      "city": "new-york",
+      "auto_collect": true,
+      "collection_key": "new-york",
+      "limit": 100,
+      "max_pages": 20,
+      "timeout": 15,
+      "max_retries": 1
+    }
+  ]
+}

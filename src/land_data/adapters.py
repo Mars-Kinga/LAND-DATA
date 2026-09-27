@@ -31,7 +31,7 @@ class AdapterCapability:
 class SourceItem:
     source: str
     external_id: str
-    source_url: str
+    source_url: Optional[str]
     payload: Dict[str, Any]
 
 

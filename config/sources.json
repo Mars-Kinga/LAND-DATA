@@ -1,6 +1,63 @@
 {
   "visibility_threshold": 0.8,
   "sources": {
+    "xiaohongshu-browser": {
+      "processing_kind": "social",
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "AUTHENTICATED",
+        "supports_geo_tag": true,
+        "supports_search": true,
+        "supports_content_text": true,
+        "supports_media_metadata": true,
+        "supports_text": true,
+        "supports_title": true,
+        "supports_hashtags": true,
+        "supports_author": true
+      },
+      "policy": {
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "author_identifier",
+          "published_at",
+          "geo_tag",
+          "hashtags",
+          "media_metadata",
+          "language",
+          "source_metadata",
+          "content_status",
+          "match_known_pois"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "author_identifier",
+          "published_at",
+          "geo_tag",
+          "hashtags",
+          "media_metadata",
+          "language",
+          "source_metadata",
+          "content_status"
+        ],
+        "temporary_fields": [],
+        "export_fields": [],
+        "retention_days": 7,
+        "retain_source_url": true,
+        "export_enabled": false,
+        "allow_source_republication": false,
+        "allow_experience_derivation": true,
+        "allow_verified_rules": true
+      }
+    },
+    "jfk-arrival-guidance": {
+      "capability": {"access_mode": "PUBLIC", "supports_content_text": true},
+      "processing_kind": "review_only_guidance",
+      "policy": {"raw_fields": [], "normalized_fields": [], "temporary_fields": [], "export_fields": [], "retention_days": 30, "retain_source_url": true, "export_enabled": false}
+    },
     "mock-places": {
       "fixture": "fixtures/mock_places.json",
       "allow_coordinate_verification": true,
@@ -12,10 +69,24 @@
         "supports_media_metadata": false
       },
       "policy": {
-        "raw_fields": ["content_type", "title", "text", "source_kind", "locations"],
-        "normalized_fields": ["content_type", "title", "text", "source_kind", "locations"],
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations"
+        ],
         "temporary_fields": [],
-        "export_fields": ["source_url"],
+        "export_fields": [
+          "source_url"
+        ],
         "retention_days": 30
       }
     },
@@ -27,11 +98,57 @@
         "supports_search": true
       },
       "policy": {
-        "raw_fields": ["content_type", "title", "text", "source_kind", "osm_object_type", "osm_object_id", "locations"],
-        "normalized_fields": ["content_type", "title", "text", "source_kind", "osm_object_type", "osm_object_id", "locations"],
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "osm_object_type",
+          "osm_object_id",
+          "locations"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "osm_object_type",
+          "osm_object_id",
+          "locations"
+        ],
         "temporary_fields": [],
-        "export_fields": ["source_url"],
+        "export_fields": [
+          "source_url"
+        ],
         "retention_days": 30
+      }
+    },
+    "official-directory": {
+      "allow_coordinate_verification": true,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_search": true
+      },
+      "policy": {
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations"
+        ],
+        "temporary_fields": [],
+        "export_fields": [
+          "source_url"
+        ],
+        "retention_days": 7
       }
     },
     "mock-social-2c": {
@@ -50,11 +167,81 @@
         "requires_authentication": false
       },
       "policy": {
-        "raw_fields": ["content_type", "title", "text", "author_identifier", "published_at", "geo_tag", "hashtags", "media_metadata", "language", "source_metadata", "text_mentions", "events", "content_status"],
-        "normalized_fields": ["content_type", "title", "text", "author_identifier", "published_at", "geo_tag", "hashtags", "media_metadata", "language", "source_metadata", "content_status"],
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "author_identifier",
+          "published_at",
+          "geo_tag",
+          "hashtags",
+          "media_metadata",
+          "language",
+          "source_metadata",
+          "text_mentions",
+          "events",
+          "content_status"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "author_identifier",
+          "published_at",
+          "geo_tag",
+          "hashtags",
+          "media_metadata",
+          "language",
+          "source_metadata",
+          "content_status"
+        ],
         "temporary_fields": [],
-        "export_fields": ["source_url", "recommendation_summary", "recommendation_signals"],
+        "export_fields": [
+          "source_url",
+          "recommendation_summary",
+          "recommendation_signals"
+        ],
         "retention_days": 7
+      }
+    },
+    "threads": {
+      "processing_kind": "social",
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "AUTHENTICATED",
+        "supports_geo_tag": true,
+        "supports_search": true,
+        "supports_content_text": true,
+        "supports_media_metadata": true,
+        "supports_text": true,
+        "supports_hashtags": true,
+        "supports_author": true
+      },
+      "policy": {
+        "raw_fields": [
+          "content_type",
+          "text",
+          "published_at",
+          "author_identifier",
+          "hashtags",
+          "media_metadata",
+          "geo_tag",
+          "source_metadata",
+          "content_status",
+          "always_mention"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "published_at",
+          "geo_tag",
+          "source_metadata",
+          "content_status"
+        ],
+        "temporary_fields": [],
+        "export_fields": [],
+        "export_enabled": false,
+        "retention_days": 1,
+        "retain_source_url": true
       }
     },
     "mock-social": {
@@ -68,12 +255,94 @@
         "supports_media_metadata": false
       },
       "policy": {
-        "raw_fields": ["content_type", "title", "text", "source_kind", "locations", "events"],
-        "normalized_fields": ["content_type", "title", "text", "source_kind", "locations", "events"],
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations",
+          "events"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "source_kind",
+          "locations",
+          "events"
+        ],
         "temporary_fields": [],
-        "export_fields": ["source_url", "recommendation_summary", "recommendation_signals"],
+        "export_fields": [
+          "source_url",
+          "recommendation_summary",
+          "recommendation_signals"
+        ],
         "retention_days": 7
       }
+    },
+    "nyc-open-data-restaurants": {
+      "allow_coordinate_verification": true,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_search": true
+      },
+      "policy": {
+        "raw_fields": ["content_type", "title", "text", "source_kind", "locations", "source_metadata"],
+        "normalized_fields": ["content_type", "title", "text", "source_kind", "locations", "source_metadata"],
+        "temporary_fields": [],
+        "export_fields": ["source_url"],
+        "retention_days": 7
+      }
+    },
+    "nyc-parks-events": {
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_search": true,
+        "supports_content_text": true,
+        "supports_title": true
+      },
+      "policy": {
+        "raw_fields": ["content_type", "title", "text", "source_kind", "events", "source_metadata"],
+        "normalized_fields": ["content_type", "title", "text", "source_kind", "events", "source_metadata"],
+        "temporary_fields": [],
+        "export_fields": [],
+        "export_enabled": false,
+        "retention_days": 30
+      }
+    },
+    "xiaohongshu-land-raw": {
+      "processing_kind": "social",
+      "allow_coordinate_verification": false,
+      "capability": {
+        "access_mode": "PUBLIC",
+        "supports_content_text": true,
+        "supports_geo_tag": true
+      },
+      "policy": {
+        "raw_fields": [
+          "content_type",
+          "title",
+          "text",
+          "hashtags",
+          "geo_tag",
+          "content_status",
+          "match_known_pois"
+        ],
+        "normalized_fields": [
+          "content_type",
+          "title",
+          "text",
+          "hashtags",
+          "geo_tag",
+          "content_status"
+        ],
+        "temporary_fields": [],
+        "export_fields": [],
+        "export_enabled": false,
+        "retention_days": 7
+      },
+      "fixture": "fixtures/land_raw_empty.json"
     }
   }
 }

@@ -62,10 +62,16 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
             source_tags=dict(location.get("osm_tags", {})),
             city=str(location["city"]), country=str(location["country"]),
             category=str(location.get("category", "other")), created_at=now,
+            parent_name=str(location.get("parent_name", "")),
+            coordinate_precision=str(location.get("coordinate_precision", "UNSPECIFIED")),
+            field_sources=dict(location.get("field_sources", {})),
+            extraction_context=dict(location.get("extraction_context", {})),
+            coordinate_source_url=location.get("coordinate_source_url"),
             latitude=location.get("latitude"), longitude=location.get("longitude"),
             source_kind=str(metadata.get("source_kind", "content")),
             coordinate_verified=allow_coordinate_verification and location.get("coordinate_verified") is True,
             confidence_score=round(confidence, 3))
+        source_review_reasons = list(location.get("review_reasons", []))
         previous = storage.get(POICandidate, candidate_id)
         identity_changed = bool(previous and candidate.source_kind == "content" and
                                 (previous.name, previous.city, previous.country, previous.category,
@@ -74,10 +80,14 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
                                  candidate.latitude, candidate.longitude))
         if previous:
             candidate.created_at = previous.created_at
-            if not identity_changed:
+            if not identity_changed and not source_review_reasons:
                 candidate.resolved_poi_id = previous.resolved_poi_id
                 candidate.review_status = previous.review_status
                 candidate.review_reasons = previous.review_reasons
+        if source_review_reasons:
+            candidate.resolved_poi_id = None
+            candidate.review_status = "NEEDS_REVIEW"
+            candidate.review_reasons = source_review_reasons
         storage.put(candidate)
         for evidence_index, evidence in enumerate(evidence_items):
             evidence_id = stable_id("evidence", candidate_id, evidence_index)
@@ -117,18 +127,68 @@ def extract(content: SourceContent, storage: Storage, source_payload: Dict,
                     created_at=previous_signal.created_at if previous_signal else now))
             storage.prune_signals(mention_id, signal_ids)
     for index, event in enumerate(metadata.get("events", [])):
-        event_id = stable_id("event-candidate", content.id, index)
+        # Structured sources provide their own stable event key.  Social
+        # extraction keeps the historical content/index identity.
+        source_event_id = event.get("source_event_id")
+        event_id = (stable_id("event-candidate", content.platform, content.external_id,
+                              str(source_event_id)) if source_event_id else
+                    stable_id("event-candidate", content.id, index))
         previous_event = storage.get(EventCandidate, event_id)
+        structured_event = bool(source_event_id)
+        source_review_reasons = list(event.get("review_reasons", []))
         candidate = EventCandidate(
             id=event_id, source_content_id=content.id, name=str(event["name"]),
             starts_at=event.get("starts_at"), ends_at=event.get("ends_at"),
             venue_candidate_id=stable_id("candidate", content.id, event["venue_index"])
             if "venue_index" in event else None,
-            created_at=previous_event.created_at if previous_event else now)
+            created_at=previous_event.created_at if previous_event else now,
+            source_event_id=str(source_event_id) if source_event_id else None,
+            lifecycle_status="ACTIVE",
+            event_url=event.get("event_url"), registration_url=event.get("registration_url"),
+            registration_description=str(event.get("registration_description", "") or ""),
+            park_ids=list(event.get("park_ids", [])), park_names=list(event.get("park_names", [])),
+            location=str(event.get("location", "") or ""),
+            categories=list(event.get("categories", [])),
+            description=str(event.get("description", "") or ""),
+            instructor=str(event.get("instructor", "") or ""),
+            contact_phone=str(event.get("contact_phone", "") or ""),
+            latitude=event.get("latitude"), longitude=event.get("longitude"),
+            timezone=str(event.get("timezone", "America/New_York")),
+            field_sources=dict(event.get("field_sources", {})))
+        candidate.extraction_confidence = event.get("extraction_confidence")
+        candidate.extraction_evidence = event.get("extraction_evidence")
         if previous_event:
-            candidate.review_status = previous_event.review_status
-            candidate.review_reasons = previous_event.review_reasons
+            candidate.lifecycle_status = "ACTIVE"
+            changed = structured_event and any(
+                getattr(previous_event, field) != getattr(candidate, field)
+                for field in ("name", "starts_at", "ends_at", "event_url", "registration_url",
+                              "registration_description", "park_ids", "park_names", "location",
+                              "categories", "description", "instructor", "contact_phone",
+                              "latitude", "longitude"))
+            if structured_event and previous_event.lifecycle_status in ("UNAVAILABLE", "EXPIRED"):
+                candidate.review_status = "NEEDS_REVIEW"
+                candidate.review_reasons = ["EVENT_REAPPEARED", *source_review_reasons]
+            elif structured_event and changed:
+                candidate.review_status = "NEEDS_REVIEW"
+                candidate.review_reasons = ["EVENT_SOURCE_UPDATED", *source_review_reasons]
+            elif source_review_reasons:
+                candidate.review_status = "NEEDS_REVIEW"
+                candidate.review_reasons = source_review_reasons
+            else:
+                candidate.review_status = previous_event.review_status
+                candidate.review_reasons = previous_event.review_reasons
+        elif structured_event:
+            candidate.review_status = "NEEDS_REVIEW"
+            candidate.review_reasons = source_review_reasons or ["EVENT_REQUIRES_REVIEW"]
         storage.put(candidate)
+        if structured_event:
+            for field_name, source_field in candidate.field_sources.items():
+                storage.put(FieldProvenance(
+                    id=stable_id("provenance", candidate.id, field_name, content.id),
+                    entity_type="EventCandidate", entity_id=candidate.id, field_name=field_name,
+                    source=content.platform, source_content_id=content.id,
+                    collected_at=content.collected_at, source_field=source_field,
+                    source_reference_url=candidate.event_url))
 
 
 def distance_meters(a_lat: float, a_lon: float, b_lat: float, b_lon: float) -> float:
@@ -151,7 +211,14 @@ def possible_poi_matches(storage: Storage, candidate: POICandidate) -> List[dict
     """Name/alias matches in the same city, with distance exposed for review."""
     results = []
     for poi in storage.pois_in_city(candidate.city):
-        if poi.country != candidate.country or poi.category != candidate.category:
+        if poi.country != candidate.country:
+            continue
+        if candidate.category == "unknown":
+            content = storage.get(SourceContent, candidate.source_content_id)
+            if not (content and content.platform == "threads" and
+                    valid_coordinates(candidate.latitude, candidate.longitude)):
+                continue
+        elif poi.category != candidate.category:
             continue
         names = list(poi.names.values()) + poi.aliases
         if normalized_name(candidate.name) not in {normalized_name(name) for name in names}:
@@ -178,10 +245,11 @@ def sync_osm_poi(storage: Storage, candidate: POICandidate) -> None:
     poi = storage.get(POI, candidate.resolved_poi_id)
     if poi is None:
         return
-    values = {"names": {candidate.name_locale: candidate.name},
+    values = {"names": {candidate.name_locale: candidate.name}, "aliases": candidate.aliases,
               "latitude": candidate.latitude, "longitude": candidate.longitude,
               "category": candidate.category, "address": candidate.address,
-              "website": candidate.website, "opening_hours": candidate.opening_hours}
+              "website": candidate.website, "opening_hours": candidate.opening_hours,
+              "coordinate_precision": candidate.coordinate_precision}
     changed = [field for field, value in values.items() if getattr(poi, field) != value]
     if not changed:
         return
@@ -194,10 +262,10 @@ def sync_osm_poi(storage: Storage, candidate: POICandidate) -> None:
     storage.put(poi)
     tag_key = "amenity" if "amenity" in candidate.source_tags else "tourism"
     prefix = "center." if content.raw_metadata.get("osm_object_type") in ("way", "relation") else ""
-    origin = {"names": "tags.name", "latitude": prefix + "lat", "longitude": prefix + "lon",
+    origin = {"names": "tags.name", "aliases": "tags.name:en", "latitude": prefix + "lat", "longitude": prefix + "lon",
               "category": "tags." + tag_key, "address": "tags.addr:full",
               "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website",
-              "opening_hours": "tags.opening_hours"}
+              "opening_hours": "tags.opening_hours", "coordinate_precision": "geometry"}
     for field in changed:
         storage.put(FieldProvenance(
             id=stable_id("provenance", poi.id, field, content.id),
@@ -207,11 +275,20 @@ def sync_osm_poi(storage: Storage, candidate: POICandidate) -> None:
             source_field=origin[field]))
 
 
-def resolve(storage: Storage) -> None:
+def resolve(storage: Storage, only_candidate_ids=None) -> None:
     candidates = sorted(storage.all(POICandidate), key=lambda value: (value.source_kind != "structured", value.id))
+    if only_candidate_ids is not None:
+        candidates = [candidate for candidate in candidates if candidate.id in only_candidate_ids]
     for candidate in candidates:
         if candidate.review_status == "REJECTED":
             continue
+        if "NYC_AGGREGATE_FIELD_CONFLICT" in candidate.review_reasons:
+            candidate.review_status = "NEEDS_REVIEW"
+            storage.put(candidate)
+            continue
+        source_content = storage.get(SourceContent, candidate.source_content_id)
+        is_nyc_structured = bool(source_content and source_content.platform == "nyc-open-data-restaurants"
+                                  and candidate.source_kind == "structured")
         if candidate.resolved_poi_id:
             if candidate.source_kind == "structured":
                 sync_osm_poi(storage, candidate)
@@ -221,8 +298,30 @@ def resolve(storage: Storage) -> None:
             storage.put(candidate)
             continue
         if candidate.category == "unknown":
-            candidate.review_reasons = ["UNKNOWN_CATEGORY"]
-            storage.put(candidate)
+            possibilities = possible_poi_matches(storage, candidate)
+            matches = [match["poi"] for match in possibilities if match["within_250m"]]
+            content = storage.get(SourceContent, candidate.source_content_id)
+            is_threads = bool(content and content.platform == "threads")
+            poi_like = bool(is_threads and isinstance(content.geo_tag, dict) and
+                            content.geo_tag.get("level") == "POI")
+            if poi_like and len(matches) == 1:
+                candidate.resolved_poi_id = matches[0].id
+                candidate.review_status = "AUTO_APPROVED"
+                candidate.review_reasons = []
+                storage.put(candidate)
+                for mention in storage.all(POIMention):
+                    if mention.poi_candidate_id == candidate.id:
+                        mention.poi_id = candidate.resolved_poi_id
+                        storage.put(mention)
+                for evidence in storage.all(LocationEvidence):
+                    if evidence.poi_candidate_id == candidate.id:
+                        evidence.matched_poi_id = candidate.resolved_poi_id
+                        storage.put(evidence)
+            else:
+                candidate.review_reasons = (["UNKNOWN_LOCATION_TYPE"] if is_threads and not poi_like else
+                                            ["AMBIGUOUS_POI_MATCH"] if len(matches) > 1 else
+                                            ["UNKNOWN_CATEGORY"])
+                storage.put(candidate)
             continue
         if candidate.source_kind == "structured" and not valid_coordinates(candidate.latitude, candidate.longitude):
             candidate.review_reasons = ["MISSING_REQUIRED_FIELD" if candidate.latitude is None or candidate.longitude is None
@@ -234,7 +333,10 @@ def resolve(storage: Storage) -> None:
             candidate.review_reasons = ["INVALID_COORDINATES"]
             storage.put(candidate)
             continue
-        possibilities = possible_poi_matches(storage, candidate)
+        # NYC CAMIS is the stable source identity. Avoid an O(n²) name/distance
+        # scan across the entire Manhattan snapshot; the candidate id already
+        # prevents duplicate creation on replay, while conflicts remain review-only.
+        possibilities = [] if is_nyc_structured else possible_poi_matches(storage, candidate)
         matches = [match["poi"] for match in possibilities if match["within_250m"]]
         coordinate_conflicts = any(not match["within_250m"] for match in possibilities)
         if len(matches) == 1:
@@ -256,9 +358,11 @@ def resolve(storage: Storage) -> None:
                 category=candidate.category, created_at=now, updated_at=now,
                 website=candidate.website, opening_hours=candidate.opening_hours,
                 last_verified_at=now, confidence_score=candidate.confidence_score,
-                coordinates_verified=True))
+                coordinates_verified=True, coordinate_precision=candidate.coordinate_precision))
             source_content = storage.get(SourceContent, candidate.source_content_id)
-            fields = ["names", "latitude", "longitude", "category"]
+            fields = ["names", "latitude", "longitude", "category", "coordinate_precision"]
+            if candidate.aliases and source_content.platform == "osm":
+                fields.append("aliases")
             if candidate.address:
                 fields.append("address")
             if candidate.website:
@@ -268,19 +372,23 @@ def resolve(storage: Storage) -> None:
             tag_key = "amenity" if "amenity" in candidate.source_tags else "tourism"
             geometry_prefix = ("center." if source_content.raw_metadata.get("osm_object_type") != "node"
                                else "")
-            origin = {"names": "tags.name", "latitude": geometry_prefix + "lat",
+            origin = {"names": "tags.name", "aliases": "tags.name:en", "latitude": geometry_prefix + "lat",
                       "longitude": geometry_prefix + "lon", "category": "tags." + tag_key,
                       "address": "tags.addr:full",
                       "website": "tags.website" if "website" in candidate.source_tags else "tags.contact:website",
-                      "opening_hours": "tags.opening_hours"}
+                      "opening_hours": "tags.opening_hours", "coordinate_precision": "geometry"}
             for field_name in fields:
+                source_field = (origin[field_name] if source_content.platform == "osm"
+                                else candidate.field_sources.get(field_name))
+                reference_url = (candidate.coordinate_source_url
+                                 if field_name in ("latitude", "longitude") else None)
                 storage.put(FieldProvenance(
                     id=stable_id("provenance", poi_id, field_name, candidate.source_content_id),
                     entity_type="POI", entity_id=poi_id, field_name=field_name,
                     source=source_content.platform,
                     source_content_id=candidate.source_content_id,
                     collected_at=source_content.collected_at, verified_at=now,
-                    source_field=origin[field_name] if source_content.platform == "osm" else None))
+                    source_field=source_field, source_reference_url=reference_url))
             candidate.resolved_poi_id = poi_id
             candidate.review_status = "AUTO_APPROVED"
             candidate.review_reasons = []
@@ -332,9 +440,17 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
             history = storage.review_history("POIMention", mention.id)
             human_approved = bool(history and history[-1].action == "APPROVE" and
                                   history[-1].new_status == "AUTO_APPROVED")
+            signals = [signal for signal in storage.all(RecommendationSignal)
+                       if signal.poi_mention_id == mention.id]
+            possible_internal_venue = bool(
+                poi and poi.category == "hotel" and source_content and
+                source_content.platform not in ("osm", "official-directory") and
+                any(signal.type in ("food", "drink") for signal in signals))
             mention.review_reasons = (
-                [] if poi and (mention.confidence_score >= 0.7 or human_approved)
-                else ["UNRESOLVED_POI" if not poi else "LOW_CONFIDENCE"])
+                [] if human_approved else
+                ["POSSIBLE_INTERNAL_VENUE"] if possible_internal_venue else
+                [] if poi and mention.confidence_score >= 0.7 else
+                ["UNRESOLVED_POI" if not poi else "LOW_CONFIDENCE"])
         mention.review_status = "AUTO_APPROVED" if not mention.review_reasons else "NEEDS_REVIEW"
         storage.put(mention)
     for candidate in storage.all(EventCandidate):
@@ -346,5 +462,28 @@ def validate_score_review(storage: Storage, visibility_threshold: float) -> None
                               starts_at=candidate.starts_at, ends_at=candidate.ends_at,
                               venue_poi_id=venue.resolved_poi_id if venue else None,
                               created_at=previous_event.created_at if previous_event else candidate.created_at,
-                              review_status=previous_event.review_status if previous_event else "NEEDS_REVIEW",
-                              review_reasons=previous_event.review_reasons if previous_event else ["EVENT_REQUIRES_REVIEW"]))
+                              review_status=(candidate.review_status if candidate.source_event_id else
+                                             previous_event.review_status if previous_event else "NEEDS_REVIEW"),
+                              review_reasons=(candidate.review_reasons if candidate.source_event_id else
+                                              previous_event.review_reasons if previous_event else
+                                              ["EVENT_REQUIRES_REVIEW"]),
+                              source_event_id=candidate.source_event_id,
+                              lifecycle_status=candidate.lifecycle_status,
+                              event_url=candidate.event_url,
+                              registration_url=candidate.registration_url,
+                              registration_description=candidate.registration_description,
+                              park_ids=list(candidate.park_ids), park_names=list(candidate.park_names),
+                              location=candidate.location, categories=list(candidate.categories),
+                              description=candidate.description, instructor=candidate.instructor,
+                              contact_phone=candidate.contact_phone,
+                              latitude=candidate.latitude, longitude=candidate.longitude,
+                              timezone=candidate.timezone, field_sources=dict(candidate.field_sources)))
+        elif candidate.source_event_id:
+            # Keep the stable Event row, but never invent a time when the
+            # source omitted or malformed one.  It remains internal review.
+            previous_event = storage.get(Event, stable_id("event", candidate.id))
+            if previous_event:
+                previous_event.lifecycle_status = candidate.lifecycle_status
+                previous_event.review_status = "NEEDS_REVIEW"
+                previous_event.review_reasons = list(candidate.review_reasons or ["INVALID_EVENT_TIME"])
+                storage.put(previous_event)

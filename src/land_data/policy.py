@@ -24,12 +24,24 @@ class SourcePolicy:
     export_fields: Tuple[str, ...] = ()
     retention_days: int = 30
     retain_source_url: bool = True
+    export_enabled: bool = True
+    # Allows a community topic to produce rule text only after every decisive
+    # block is independently supported by an official/operator reference.
+    # It does not permit exporting the community post or its evidence.
+    allow_verified_rules: bool = False
+    # Source republication and derived experience are separate, closed-by-
+    # default permissions. A source can remain closed to its original material
+    # while allowing a reviewed, privacy-safe derivative.
+    allow_source_republication: bool = False
+    allow_experience_derivation: bool = False
 
     def __post_init__(self) -> None:
         if self.retention_days < 0:
             raise ValueError("retention_days must be nonnegative")
         if not set(self.normalized_fields).issubset(self.raw_fields):
             raise ValueError("normalized fields must be retained in raw records")
+        if not isinstance(self.allow_source_republication, bool):
+            raise ValueError("allow_source_republication must be a boolean")
 
     def retained_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         retained = remove_secrets({key: payload[key] for key in self.raw_fields if key in payload})

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.land-data.nyc-osm</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/zsh</string><string>/Users/mars/Library/Application Support/LAND-DATA/land_data_unattended.sh</string><string>nyc</string></array>
+  <key>WorkingDirectory</key><string>/Users/mars/Downloads/LAND-DATA</string>
+  <key>StartInterval</key><integer>86400</integer>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/Users/mars/Downloads/LAND-DATA/.local/launchd/launchd.stdout.log</string>
+  <key>StandardErrorPath</key><string>/Users/mars/Downloads/LAND-DATA/.local/launchd/launchd.stderr.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LAND_DATA_ROOT</key><string>/Users/mars/Downloads/LAND-DATA</string>
+    <key>LAND_DATA_DB</key><string>/Users/mars/Downloads/LAND-DATA/.local/nyc-incremental-acceptance-v2.db</string>
+    <key>LAND_DATA_RETRIES</key><string>2</string>
+  <key>LAND_DATA_RETRY_DELAY</key><string>30</string>
+  </dict>
+</dict>
+</plist>

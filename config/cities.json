@@ -1,4 +1,14 @@
 {
+  "new-york": {
+    "display_name": "New York City",
+    "aliases": [
+      "New York",
+      "NYC"
+    ],
+    "country": "US",
+    "latitude": 40.7128,
+    "longitude": -74.006
+  },
   "mock-tokyo": {
     "display_name": "Synthetic Tokyo fixture",
     "country": "JP",

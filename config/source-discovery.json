@@ -1,0 +1,30 @@
+{
+  "provider": "socrata-catalog",
+  "catalog_endpoint": "https://api.us.socrata.com/api/catalog/v1",
+  "allowed_domains": ["data.cityofnewyork.us"],
+  "schedule": "weekly",
+  "limit": 10,
+  "max_pages": 1,
+  "timeout": 15,
+  "max_retries": 1,
+  "schema_probe_limit": 10,
+  "supported_datasets": {
+    "43nn-pn8j": {
+      "family": "nyc-open-data-restaurants",
+      "required_fields": ["camis", "dba", "latitude", "longitude"]
+    },
+    "w3wp-dpdi": {
+      "family": "nyc-parks-events",
+      "required_fields": ["guid", "title", "starttime", "endtime", "coordinates"]
+    }
+  },
+  "queries": [
+    {"name": "places", "terms": ["restaurant", "cafe", "bar"]},
+    {"name": "museums", "terms": ["museum", "gallery"]},
+    {"name": "attractions", "terms": ["attraction", "landmark"]},
+    {"name": "parks", "terms": ["park", "recreation"]},
+    {"name": "events", "terms": ["event", "festival"]},
+    {"name": "hotels", "terms": ["hotel", "lodging"]},
+    {"name": "shopping", "terms": ["shopping", "market"]}
+  ]
+}

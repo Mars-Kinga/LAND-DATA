@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.land-data.source-discovery</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>/Users/mars/Library/Application Support/LAND-DATA/source_discovery_unattended.sh</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>604800</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>WorkingDirectory</key>
+  <string>/Users/mars/Downloads/LAND-DATA</string>
+  <key>StandardOutPath</key>
+  <string>/Users/mars/Downloads/LAND-DATA/.local/launchd/source-discovery.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/mars/Downloads/LAND-DATA/.local/launchd/source-discovery.stderr.log</string>
+</dict>
+</plist>

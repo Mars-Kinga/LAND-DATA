@@ -9,7 +9,8 @@ from land_data.auth import MockSessionStore
 from land_data.config import load_config
 from land_data.export import dataset
 from land_data.geoscope import GeoScope, load_scope
-from land_data.models import (Event, EventCandidate, FieldProvenance, LocationEvidence, POI,
+from land_data.local_classifier import CLASSIFIER_VERSION
+from land_data.models import (ContentClassification, Event, EventCandidate, FieldProvenance, LocationEvidence, POI,
                               POICandidate, POIMention, RawSourceRecord, RecommendationSignal, SourceContent)
 from land_data.osm import OSMSourceAdapter
 from land_data.pipeline import Pipeline
@@ -100,6 +101,15 @@ class SocialTests(unittest.TestCase):
         self.assertEqual(content.published_at, "2026-09-20T12:00:00Z")
         self.assertEqual(content.collection_scope, self.scope.name)
         self.assertEqual(content.content_status, "ACTIVE")
+
+    def test_social_pipeline_persists_zero_llm_classification_for_every_post(self):
+        self.run_social()
+        classifications = self.storage.all(ContentClassification)
+        social_contents = [item for item in self.storage.all(SourceContent)
+                           if item.platform == "mock-social-2c"]
+        self.assertEqual(len(classifications), len(social_contents))
+        self.assertTrue(all(item.classifier_version == CLASSIFIER_VERSION
+                            for item in classifications))
 
     def test_geo_tag_and_text_extraction(self):
         self.run_social()
@@ -301,6 +311,37 @@ class SocialTests(unittest.TestCase):
         self.storage.purge_expired_raw("9999-01-01T00:00:00Z")
         self.assertEqual(len(dataset(self.storage, self.config, "Mock City", self.scope.name)["pois"]), 5)
         self.assertEqual(len(dataset(self.storage, self.config, "Mock City", other.name)["pois"]), 1)
+
+    def test_opt_in_title_match_uses_osm_alias_without_geo_tag(self):
+        element = {"type": "node", "id": 93101, "lat": 0.0008, "lon": 0.0008,
+                   "tags": {"name": "オーロラハウス", "name:en": "Aurora House",
+                            "tourism": "hotel"}}
+        body = json.dumps({"elements": [element]}).encode()
+        osm = OSMSourceAdapter(self.scope, categories=("hotel",),
+                               opener=lambda _request, timeout: Response(body))
+        self.pipeline.run(self.scope.name, [osm], self.scope)
+        source = self.config.sources["mock-social-2c"]
+        policy = replace(source.policy, raw_fields=source.policy.raw_fields + ("match_known_pois",))
+        config = replace(self.config, sources={**self.config.sources,
+                                               source.name: replace(source, policy=policy)})
+        item = SourceItem(source.name, "observed-title", "https://social.example.invalid/observed-title",
+                          {"content_type": "SOCIAL_POST", "title": "📍 Aurora House",
+                           "text": "🍧 #刨冰", "match_known_pois": True})
+        Pipeline(self.storage, config).run(self.scope.name, [OneItemAdapter(item)], self.scope)
+        candidate = self.candidates("observed-title")[0]
+        poi = self.storage.get(POI, candidate.resolved_poi_id)
+        self.assertEqual(poi.aliases, ["Aurora House"])
+        self.assertTrue(any(p.entity_id == poi.id and p.field_name == "aliases" and
+                            p.source_field == "tags.name:en" for p in self.storage.all(FieldProvenance)))
+        self.assertEqual(candidate.review_status, "AUTO_APPROVED")
+        evidence = [e.type for e in self.storage.all(LocationEvidence) if e.poi_candidate_id == candidate.id]
+        self.assertEqual(evidence, ["TITLE_EXTRACTED"])
+        mention = self.mentions("observed-title")[0]
+        self.assertEqual(mention.poi_id, poi.id)
+        self.assertEqual(mention.review_status, "NEEDS_REVIEW")
+        self.assertEqual(mention.review_reasons, ["POSSIBLE_INTERNAL_VENUE"])
+        self.assertEqual([(s.value, s.sentiment) for s in self.signals(mention)],
+                         [("shaved ice", None)])
 
 
 if __name__ == "__main__":

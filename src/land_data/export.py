@@ -25,6 +25,7 @@ def dataset(storage: Storage, config: Config, city: str, scope_id: str = None) -
     contents = {content.id: content for content in storage.all(SourceContent)}
     signals = storage.all(RecommendationSignal)
     mentions = []
+    count_sources = {}
     for mention in storage.all(POIMention):
         if mention.poi_id not in poi_ids or mention.review_status != "AUTO_APPROVED" or not mention.active:
             continue
@@ -32,6 +33,8 @@ def dataset(storage: Storage, config: Config, city: str, scope_id: str = None) -
         if source.content_status == "UNAVAILABLE":
             continue
         policy = config.sources[source.platform].policy
+        if not policy.export_enabled:
+            continue
         item = {
             "id": mention.id, "poi_id": mention.poi_id,
             "relation_type": mention.relation_type,
@@ -41,8 +44,12 @@ def dataset(storage: Storage, config: Config, city: str, scope_id: str = None) -
         if "recommendation_summary" in policy.export_fields:
             item["recommendation_summary"] = mention.recommendation_summary
         if "recommendation_signals" in policy.export_fields:
+            linked = [signal for signal in signals if signal.poi_mention_id == mention.id]
             item["signals"] = [{"type": signal.type, "value": signal.value, "confidence": signal.confidence}
-                               for signal in signals if signal.poi_mention_id == mention.id]
+                               for signal in linked]
+            for signal in linked:
+                count_sources.setdefault(mention.poi_id, {}).setdefault(
+                    (signal.type, signal.value), set()).add(source.id)
         mentions.append(item)
     return {
         "schema_version": 1, "city": city, "generated_at": utc_now(),
@@ -52,12 +59,19 @@ def dataset(storage: Storage, config: Config, city: str, scope_id: str = None) -
                                 if poi_ids & osm_ids else []),
         "pois": [{"id": poi.id, "names": poi.names, "aliases": poi.aliases,
                   "latitude": poi.latitude, "longitude": poi.longitude,
+                  "coordinate_precision": poi.coordinate_precision,
+                  **({"parent_poi_id": poi.parent_poi_id} if poi.parent_poi_id else {}),
                   "address": poi.address, "category": poi.category,
                   **({"website": poi.website} if poi.website else {}),
                   "subcategory": poi.subcategory, "tags": poi.tags,
                   "confidence_score": poi.confidence_score, "quality_score": poi.quality_score,
                   "last_verified_at": poi.last_verified_at,
-                  "recommendation_counts": storage.recommendation_counts(poi.id)} for poi in visible],
+                  "recommendation_counts": [
+                      {"type": kind, "value": value, "mentions": len(source_ids)}
+                      for (kind, value), source_ids in sorted(
+                          count_sources.get(poi.id, {}).items(),
+                          key=lambda item: (-len(item[1]), item[0][0], item[0][1]))
+                  ]} for poi in visible],
         "mentions": mentions,
     }
 
