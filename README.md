@@ -1,6 +1,54 @@
 # LAND-Data
 
-LAND 的独立地点与推荐数据基础设施。2B 增加了限量的 OpenStreetMap / Overpass 结构化来源；2C 增加平台无关的社交内容处理层；2D-2 Part A 增加 Meta 官方 Threads API Adapter。Threads 目前只通过模拟 API 测试，尚未获得 Meta OAuth 授权或进行真实验收。社交内容可选择使用千问进行文本抽取，默认仍走确定性处理；不修改相邻的 LAND iOS 项目。
+LAND-Data 是 LAND 的独立地点、活动、文化知识与推荐数据采集和审核工具。它把来源采集、去重、确定性处理、可选的模型抽取、人工审核和发布准备分开，便于在不依赖 Codex 的情况下长期运行。
+
+## 问题—架构—结果
+
+**问题：** 旅行数据来自多个来源，格式、更新频率、授权和可信度不同；直接把网页或社区帖子写进 App，容易混淆个人经验、地点事实和动态信息，也难以断点续跑。
+
+**架构：** 结构化来源、登录后的可见社区页面和本地 JSON 进入统一的 Raw / SourceContent 层；本地规则先做去重、分类、匹配和状态分流，只有明确选择的候选才进入千问抽取。结果在 SQLite 中保留来源、字段 provenance、checkpoint 和审核历史，通过局域网 Dashboard 查看，再由显式的 release 流程交给 LAND。
+
+**结果：** 默认路径为零 LLM；采集失败可重试，重复运行不会重复写入，分类结果可解释且可审计。当前已覆盖 Mock、NYC Open Data、OSM、NYC Parks Events、小红书网页采集和受限 Threads Adapter；Threads 仍只完成模拟 API 测试，未完成真实 OAuth 验收。社区内容默认不公开发布，POI、Event 和官方指引也必须满足各自的发布契约。
+
+## 架构概览
+
+```mermaid
+flowchart LR
+    A[Dashboard / CLI] --> B[官方数据 · OSM · 小红书 · Threads]
+    B --> C[Raw / SourceContent]
+    C --> D[本地 classifier<br/>默认零 LLM]
+    D --> E[确定性处理]
+    D -. 明确选择候选 .-> F[Codex / 千问 / 人工]
+    F --> E
+    E --> G[provenance + 审核安全门]
+    G --> H[版本化发布包]
+    H --> I[LAND App]
+    C <--> J[(SQLite<br/>checkpoint / run / review)]
+```
+
+完整阶段边界、状态存储和失败隔离见[架构说明](./docs/architecture.md)。
+
+## 三分钟 Quick Start
+
+在仓库根目录运行下面的离线示例，不需要账号、网络或模型密钥：
+
+```sh
+./land-data auth-status mock-social
+./land-data auth mock-social
+./land-data pipeline --city mock-tokyo
+./land-data review list --city mock-tokyo
+./land-data export --city mock-tokyo --output .local/exports/mock-tokyo.json
+```
+
+查看局域网审核页面：
+
+```sh
+./land-data --db .local/land-data.db dashboard
+```
+
+![LAND-DATA Dashboard：选择城市、采集处理、审核与发布流程](./docs/assets/dashboard.png)
+
+需要采集本人已登录的小红书可见页面时，先运行 `./land-data xhs login`，再运行 `./land-data --db .local/land-data.db xhs collect`；采集阶段和默认规则处理都不调用 LLM。完整命令、登录边界、城市配置、审核与发布步骤见[操作说明](./操作说明.md)；终端工具细节见[小红书终端工具说明](./docs/xiaohongshu-terminal-tool.md)，Dashboard 安全边界见[Dashboard 说明](./docs/review-dashboard.md)。
 
 ## 运行
 
@@ -60,7 +108,7 @@ Port Authority 的 [网站免责声明](https://www.jfkairport.com/website-discl
 ./land-data --db .local/land-data.db xhs process --city new-york --llm auto --limit 20
 ```
 
-来源保持 `export_enabled=false`。千问只做未结构化文字抽取，不负责事实验证、坐标确认或自动发布。日常运行先看[操作说明](/Users/mars/Downloads/LAND-DATA/操作说明.md)；完整状态机、checkpoint 和数据边界见[小红书终端工具说明](/Users/mars/Downloads/LAND-DATA/docs/xiaohongshu-terminal-tool.md)。
+来源保持 `export_enabled=false`。千问只做未结构化文字抽取，不负责事实验证、坐标确认或自动发布。日常运行先看[操作说明](./操作说明.md)；完整状态机、checkpoint 和数据边界见[小红书终端工具说明](./docs/xiaohongshu-terminal-tool.md)。
 
 ## 局域网人工审核 Dashboard
 
@@ -96,7 +144,7 @@ Dashboard 默认零 LLM。只有人工明确选择候选 ID、指定 `--llm auto
   --land-root ../LAND
 ```
 
-当前自动发布只覆盖 LAND QAU 知识内容。POI/Place、Event、官方 Guide/指导快照仍缺少到 LAND App 的发布映射和安装契约；它们可以采集、查看和审核，但不能因审核通过或 QAU release 成功就宣称已经进入 App。详细操作见[Dashboard 说明](/Users/mars/Downloads/LAND-DATA/docs/review-dashboard.md)。
+当前自动发布只覆盖 LAND QAU 知识内容。POI/Place、Event、官方 Guide/指导快照仍缺少到 LAND App 的发布映射和安装契约；它们可以采集、查看和审核，但不能因审核通过或 QAU release 成功就宣称已经进入 App。详细操作见[Dashboard 说明](./docs/review-dashboard.md)。
 
 ## LAND QAU 本地发布
 
@@ -115,7 +163,7 @@ Dashboard 默认零 LLM。只有人工明确选择候选 ID、指定 `--llm auto
 ./land-data publish rollback --release <release-id> --land-root ../LAND --reason "回滚原因"
 ```
 
-小红书原帖、链接和作者身份仍不会发布。通过人工审核的个人经验可被改写为匿名的 `editorial_experience`，在 LAND 中明确显示为“旅行者经验 · LAND 编辑整理”，并且不能作为官方规则依据。动态规则只有经官方/运营方来源独立验证、带有效期且通过人工 release 核验后才能安装。详细操作见[操作说明](/Users/mars/Downloads/LAND-DATA/操作说明.md#11-将已审核知识发布到-land)。
+小红书原帖、链接和作者身份仍不会发布。通过人工审核的个人经验可被改写为匿名的 `editorial_experience`，在 LAND 中明确显示为“旅行者经验 · LAND 编辑整理”，并且不能作为官方规则依据。动态规则只有经官方/运营方来源独立验证、带有效期且通过人工 release 核验后才能安装。详细操作见[操作说明](./操作说明.md#11-将已审核知识发布到-land)。
 
 ## 多来源无人值守入口（NYC Open Data、OSM 与 NYC Parks Events）
 
@@ -127,7 +175,7 @@ Dashboard 默认零 LLM。只有人工明确选择候选 ID、指定 `--llm auto
 
 ### macOS launchd（NYC、OSM 与 Events 分开调度）
 
-入口脚本是 [land_data_unattended.sh](/Users/mars/Downloads/LAND-DATA/scripts/land_data_unattended.sh)，参数为 `nyc`、`osm`、`events` 或 `both`；锁按来源隔离，同一来源不重叠。NYC、OSM 和 Events 均可独立每日运行；每次来源失败会留在 `source_runs`，外层尝试最多重跑 2 次，仍失败则保留非零退出码。
+入口脚本是 [land_data_unattended.sh](./scripts/land_data_unattended.sh)，参数为 `nyc`、`osm`、`events` 或 `both`；锁按来源隔离，同一来源不重叠。NYC、OSM 和 Events 均可独立每日运行；每次来源失败会留在 `source_runs`，外层尝试最多重跑 2 次，仍失败则保留非零退出码。
 
 ```sh
 mkdir -p "$HOME/Library/LaunchAgents"
@@ -179,7 +227,7 @@ rm "$HOME/Library/LaunchAgents/com.land-data.nyc.plist" "$HOME/Library/LaunchAge
 ./land-data --db .local/land-data.db discover-sources --list-runs
 ```
 
-需要只发现或只运行现有来源时，可使用 `auto-collect --discovery-only` 或 `auto-collect --collection-only`。独立的 [source_discovery_unattended.sh](/Users/mars/Downloads/LAND-DATA/scripts/source_discovery_unattended.sh) 与 [launchd 配置](/Users/mars/Downloads/LAND-DATA/config/launchd/com.land-data.source-discovery.plist) 默认每周运行一次；它只更新发现候选，不启用任何未知 dataset。若 Catalog 或 schema 探测部分失败，成功查询和已保存候选会保留，并以机器可读的 `PARTIAL_FAILURE` / `RETRY_REQUIRED` 返回。
+需要只发现或只运行现有来源时，可使用 `auto-collect --discovery-only` 或 `auto-collect --collection-only`。独立的 [source_discovery_unattended.sh](./scripts/source_discovery_unattended.sh) 与 [launchd 配置](./config/launchd/com.land-data.source-discovery.plist) 默认每周运行一次；它只更新发现候选，不启用任何未知 dataset。若 Catalog 或 schema 探测部分失败，成功查询和已保存候选会保留，并以机器可读的 `PARTIAL_FAILURE` / `RETRY_REQUIRED` 返回。
 
 安装独立发现定时入口：
 
@@ -344,7 +392,7 @@ POI 的 `map_visibility` 只有在坐标有效且已验证、验证通过、审�
 
 ## 局域网人工审核 Dashboard
 
-Dashboard 已覆盖城市创建、来源计划、采集/处理作业、进度与存储位置、全部状态浏览、人工审核、显式候选千问抽取以及 QAU prepare/diff/verify/install。审核范围、局域网安全边界、个人经验匿名发布、官方核验字段和关闭服务说明见[局域网采集与审核 Dashboard 操作说明](/Users/mars/Downloads/LAND-DATA/docs/review-dashboard.md)。终端命令继续作为等价的备用入口；两者复用同一套审核、知识处理和发布服务。
+Dashboard 已覆盖城市创建、来源计划、采集/处理作业、进度与存储位置、全部状态浏览、人工审核、显式候选千问抽取以及 QAU prepare/diff/verify/install。审核范围、局域网安全边界、个人经验匿名发布、官方核验字段和关闭服务说明见[局域网采集与审核 Dashboard 操作说明](./docs/review-dashboard.md)。终端命令继续作为等价的备用入口；两者复用同一套审核、知识处理和发布服务。
 
 ### 可复现的 Mock 歧义场景
 
@@ -420,3 +468,7 @@ scripts/social_acceptance.py  完全离线的 2C 验收脚本
 - OSM 只支持少数确定性类别、bbox 查询和小样本采集；Way/Relation 使用 Overpass 返回的几何中心，中心可能不在多边形内。scope 隔离根据 POI FieldProvenance 追溯 SourceContent 的采集 scope；没有复杂地理层级。OSM 更新同步只覆盖它原始创建的 POI，不提供完整版本历史。
 - Threads Adapter 已实现但未获得官方授权进行真实验收；`location_id` 覆盖率及官方字段/权限的实际可用性未知。规则推荐仅覆盖少数示例词。`UNAVAILABLE` 内容的旧 Derived 行保留用于追溯但不发布；删除地点后旧 Mention 失活，但旧 Candidate、Event 和审核历史没有通用版本修订系统。
 - 当前导出是 LAND-Data 的独立 schema；LAND iOS 现有 `Place` 契约没有 Mention/Signal 列表，接入需要单独设计并经确认。
+
+## License
+
+本项目使用 [MIT License](./LICENSE)。各上游数据源仍受其各自的许可、署名与再发布条件约束。

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "indexID": "land-data-test-base",
+  "revision": 1,
+  "frozenSource": {
+    "resourceName": "land-data-test-fixture",
+    "candidatePath": "fixtures/question-content-index-base.json",
+    "sha256": "fixture"
+  },
+  "situations": [
+    {
+      "situationID": "fixture-situation",
+      "locale": "zh-Hans",
+      "title": "Fixture question"
+    }
+  ],
+  "questions": [
+    {
+      "questionID": "fixture-question",
+      "revision": 1,
+      "locale": "zh-Hans",
+      "situationID": "fixture-situation",
+      "intent": "explanation",
+      "question": "测试基础问题",
+      "searchAliases": [],
+      "directAnswer": {
+        "blockID": "fixture-answer",
+        "text": "这是用于测试合并的基础内容。",
+        "determinesAction": true
+      },
+      "actions": [],
+      "successSignals": [],
+      "whatIfs": [],
+      "relatedQuestionIDs": [],
+      "ownerScope": {
+        "kind": "city",
+        "id": "fixture-city",
+        "countryID": "US"
+      },
+      "applicability": {
+        "requirements": {
+          "country": ["US"],
+          "city": ["fixture-city"]
+        },
+        "validFrom": null,
+        "validUntil": null,
+        "summary": "测试范围",
+        "unconfirmed": []
+      },
+      "placements": [],
+      "countryPlacements": [],
+      "relation": null,
+      "supportBindings": [
+        {
+          "blockID": "fixture-answer",
+          "detailIDs": ["fixture-reference-detail"],
+          "role": "rule",
+          "applicability": {
+            "requirements": {
+              "country": ["US"],
+              "city": ["fixture-city"]
+            }
+          },
+          "verifiedAt": null,
+          "validUntil": null,
+          "needsReview": false
+        }
+      ],
+      "referenceRef": {
+        "referenceID": "fixture-reference",
+        "revision": 1
+      },
+      "legacyRefs": [],
+      "editorialState": "published",
+      "productReviewState": "accepted",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "contentGaps": []
+    }
+  ],
+  "references": [
+    {
+      "ref": {
+        "referenceID": "fixture-reference",
+        "revision": 1
+      },
+      "details": [
+        {
+          "detailID": "fixture-reference-detail",
+          "kind": "official",
+          "title": "Fixture source",
+          "url": "https://example.gov/fixture",
+          "author": "Fixture",
+          "platform": "fixture",
+          "role": "rule",
+          "publishedAt": null,
+          "collectedAt": "2026-01-01T00:00:00Z"
+        }
+      ],
+      "limitations": [],
+      "frozenTipRefs": [],
+      "artifactPaths": []
+    }
+  ],
+  "legacyMappings": [],
+  "transport": []
+}

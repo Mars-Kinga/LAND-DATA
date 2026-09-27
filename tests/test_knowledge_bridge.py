@@ -12,7 +12,10 @@ from land_data.util import stable_id, utc_now
 from land_data.xhs_processing import process_xhs
 
 
-BASE_INDEX = Path("/Users/mars/Downloads/LAND/LAND/Resources/question-content-index-v1.json")
+# Keep the bridge contract test independent of the adjacent LAND application.
+# This fixture is the smallest valid QuestionContentIndex v1 base; the bridge
+# adds the reviewed question under test to it.
+BASE_INDEX = Path(__file__).resolve().parents[1] / "fixtures" / "question-content-index-base.json"
 
 
 class FakeClient:
@@ -89,7 +92,7 @@ class KnowledgeBridgeTests(unittest.TestCase):
             index = json.loads((Path(result["release_dir"]) / "question-content-index-v1.json").read_text())
             question = index["questions"][-1]
             self.assertEqual(result["compiled"], 1)
-            self.assertEqual(len(index["questions"]), 178)
+            self.assertEqual(len(index["questions"]), 2)
             self.assertEqual(question["supportBindings"][0]["role"], "experience")
             self.assertTrue(question["directAnswer"]["attribution"])
             detail = index["references"][-1]["details"][0]

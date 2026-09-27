@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Local, mock-first data pipeline for LAND places and recommendations"
 requires-python = ">=3.9"
 dependencies = []
+license = {file = "LICENSE"}
 
 [project.scripts]
 land-data = "land_data.cli:main"

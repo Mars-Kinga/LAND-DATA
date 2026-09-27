@@ -1,7 +1,7 @@
 # 纽约旅客场景与独立来源计划
 
-`LAND/data/acquisition-pilot/nyc-wave-1` 的 403 篇小红书 Raw 已由
-[`history-manifest.json`](/Users/mars/Downloads/LAND/data/acquisition-pilot/nyc-wave-1/history-manifest.json)
+如果 LAND 与本仓库并列放置，`../LAND/data/acquisition-pilot/nyc-wave-1` 的 403 篇小红书 Raw 已由
+[`history-manifest.json`](../../LAND/data/acquisition-pilot/nyc-wave-1/history-manifest.json)
 标记为 `HISTORICAL_DISCOVERY_INPUT`。它不能计入新采集器吞吐、来源覆盖或 unseen 质量基线。
 
 | 场景与用户问题 | 需要核验的字段 | 可用来源与处理边界 |

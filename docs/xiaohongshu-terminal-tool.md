@@ -52,10 +52,10 @@
 
 ## 第一次使用
 
-在 LAND-DATA 根目录运行：
+在克隆后的 LAND-DATA 仓库根目录运行。若当前目录已经在仓库内，可以用 Git 自动定位根目录：
 
 ```bash
-cd /Users/mars/Downloads/LAND-DATA
+cd "$(git rev-parse --show-toplevel)"
 
 ./land-data xhs login
 ```

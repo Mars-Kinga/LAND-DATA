@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import subprocess
@@ -23,6 +24,20 @@ class DashboardTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.db_path = str(Path(self.temp.name) / "dashboard.db")
+        # Dashboard tests must not discover or depend on a sibling LAND
+        # checkout.  Keep the homepage contract in a small repository-local
+        # test fixture instead.
+        self.land_root = Path(self.temp.name) / "LAND"
+        resources = self.land_root / "LAND" / "Resources"
+        resources.mkdir(parents=True)
+        (resources / "city-home-registry.json").write_text(json.dumps({
+            "schemaVersion": 1,
+            "cities": [{"cityID": "new-york", "reviewState": "ready",
+                         "localTitle": "纽约", "englishTitle": "New York"}],
+        }), encoding="utf-8")
+        (resources / "published-content.json").write_text(json.dumps({
+            "destinations": [{"id": "new-york"}], "places": [], "guides": []
+        }), encoding="utf-8")
         self.storage = SQLiteStorage(self.db_path)
         self.addCleanup(self.storage.close)
         now = utc_now()
@@ -55,7 +70,7 @@ class DashboardTests(unittest.TestCase):
             now, "test", now, now, status="NEEDS_REVIEW"))
         self.storage.put(SourceRunRecord("run-dashboard", "multi", "mock", "test", now, now,
                                          status="SUCCEEDED", next_run_status="NOT_NEEDED"))
-        self.app = DashboardApp(self.db_path, str(ROOT))
+        self.app = DashboardApp(self.db_path, str(ROOT), land_root=str(self.land_root))
 
     def test_dashboard_lists_reviewed_and_read_only_records(self):
         result = self.app.list_items({"limit": ["500"]})

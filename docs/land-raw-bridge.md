@@ -4,7 +4,7 @@
 
 ```sh
 ./land-data --db .local/land-raw.db process-land-raw \
-  --raw-dir /Users/mars/Downloads/LAND/data/acquisition-pilot/nyc-wave-1/content/raw/records
+  --raw-dir ../LAND/data/acquisition-pilot/nyc-wave-1/content/raw/records
 ```
 
 `nyc-wave-1` 已被标记为历史 discovery 输入；默认命令会拒绝它，避免混入新采集器指标。只有存档分析才可显式加入 `--allow-historical`。
@@ -22,7 +22,7 @@
 ## 独立定时入口设计
 
 1. 获得可定时使用的数据来源及内容处理许可后，独立采集任务把每批授权的完整输入归档到固定目录，再调用 LAND `tools/collect_content.py --input ... --query ... --city new-york --data-dir ...`。Collector 已支持输入指纹、精确去重、进程锁和续跑。
-2. 采集成功后，调度器调用上面的 `process-land-raw` 命令。SQLite 文件和 Raw 目录使用绝对路径；失败退出码触发告警，下一次重跑仍可续跑。按来源授权决定是否开启模型处理；待审队列由人审核后再发布。
+2. 采集成功后，调度器调用上面的 `process-land-raw` 命令。SQLite 文件和 Raw 目录可以使用相对或绝对路径；上面的示例假定 LAND 与 LAND-DATA 位于同一父目录。失败退出码触发告警，下一次重跑仍可续跑。按来源授权决定是否开启模型处理；待审队列由人审核后再发布。
 3. 可用系统 `launchd` 或服务器定时器调度这个入口，但目前不要安装无人值守的小红书抓取任务：LAND 现有真实采集是登录浏览器里的搜索/详情 DOM 与人工监督的小批量流程，LAND Collector 的正式命令只消费本地 JSON。没有经验证可长期无人值守的官方公开笔记搜索/全文接口、稳定登录续期、访问限制处理和内容复用许可。
 
 官方开放平台当前公开的 scope 中 `read_notes` 仍标为规划中，首期只有 `basic_info`；它也不等于任意公开笔记搜索授权。现阶段能独立定时运行的是**已获准输入的导入、分流和处理**，不能声称小红书端已实现合法可靠的无人值守采集。

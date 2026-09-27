@@ -28,10 +28,10 @@ Dashboard 需要同时显示两类内容：
 
 ## 2. 启动
 
-启动前先进入 LAND-DATA 根目录，并确认要使用的数据库：
+启动前先进入克隆后的 LAND-DATA 仓库根目录，并确认要使用的数据库。若当前目录已经在仓库内，可以用 Git 自动定位根目录：
 
 ```bash
-cd /Users/mars/Downloads/LAND-DATA
+cd "$(git rev-parse --show-toplevel)"
 ./land-data --db .local/land-data.db xhs status
 ```
 
