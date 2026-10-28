@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-28",
+  "protocol": "LAND-DATA pre-Agent validate/review operational baseline",
+  "input_sha256": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11",
+  "full_candidate_count": 12958,
+  "new_york_candidate_count": 12704,
+  "new_york_status": {
+    "AUTO_APPROVED": 12620,
+    "NEEDS_REVIEW": 84
+  },
+  "new_york_auto_approved_rate": 0.9933886964735517,
+  "new_york_review_rate": 0.006611303526448362,
+  "review_reason_counts": {
+    "MISSING_REQUIRED_FIELD": 84
+  },
+  "location_evidence_rows": 25832,
+  "location_evidence_candidate_count": 12958,
+  "validate_elapsed_seconds_observed": [
+    4.15,
+    5.78,
+    7.1247
+  ],
+  "review_elapsed_seconds_observed": [
+    0.31,
+    0.2987
+  ],
+  "logical_row_diff_total": 0,
+  "network_calls": 0,
+  "llm_calls": 0,
+  "input_quick_check": "ok",
+  "output_quick_check": "ok",
+  "input_integrity_check": "ok",
+  "output_integrity_check": "ok",
+  "accuracy_claim": false,
+  "limitation": "AUTO_APPROVED is an internal status; no independent Gold labels are present."
+}

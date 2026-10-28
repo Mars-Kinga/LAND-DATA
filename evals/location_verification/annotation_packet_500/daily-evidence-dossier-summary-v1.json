@@ -1,0 +1,18 @@
+{
+  "case_count": 500,
+  "dossiers_sha256": "3d20fc51b262fbcf789f9a48f0dfb0debe9a29f98dc55725d10c24a32b8bd4bc",
+  "gold_labels": 0,
+  "input_hashes": {
+    "capture_manifest": "5cae01939ee4bf76535b5aa2d6e3544368f0d8d34b12302237778f6f6d2de5c6",
+    "current_dot": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c",
+    "historical_dot": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d",
+    "packet": "90a35f98b3d4e21762906ae2da7c4d50c2018bceae374df247747a7bc396b121"
+  },
+  "scope": "Reviewer-only evidence; no Gold or location accuracy",
+  "source_record_counts": {
+    "DOHMH_INTAKE": 397,
+    "DOT_CURRENT": 24,
+    "DOT_HISTORICAL": 117,
+    "OSM_INTAKE": 103
+  }
+}

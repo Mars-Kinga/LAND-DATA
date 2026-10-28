@@ -1,8 +1,11 @@
 import json
 import tempfile
 import unittest
+from datetime import datetime, timezone
+from unittest.mock import patch
 from pathlib import Path
 
+import land_data.knowledge_bridge as knowledge_bridge_module
 from land_data.config import load_config
 from land_data.knowledge_bridge import prepare_release, release_diff, verify_release
 from land_data.knowledge_processing import KnowledgeProcessingService, review_knowledge_draft
@@ -16,6 +19,16 @@ from land_data.xhs_processing import process_xhs
 # This fixture is the smallest valid QuestionContentIndex v1 base; the bridge
 # adds the reviewed question under test to it.
 BASE_INDEX = Path(__file__).resolve().parents[1] / "fixtures" / "question-content-index-base.json"
+
+
+REFERENCE_NOW = datetime(2026, 10, 20, tzinfo=timezone.utc)
+
+
+class FrozenDateTime(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        value = REFERENCE_NOW
+        return value.astimezone(tz) if tz else value.replace(tzinfo=None)
 
 
 class FakeClient:
@@ -49,6 +62,9 @@ def draft(*, dynamic=False, gap=False):
 class KnowledgeBridgeTests(unittest.TestCase):
     def setUp(self):
         self.config = load_config(str(Path(__file__).resolve().parents[1]))
+        self.clock_patch = patch.object(knowledge_bridge_module, "datetime", FrozenDateTime)
+        self.clock_patch.start()
+        self.addCleanup(self.clock_patch.stop)
 
     def _record(self):
         now = utc_now()

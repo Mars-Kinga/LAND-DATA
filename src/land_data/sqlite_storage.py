@@ -196,7 +196,7 @@ class SQLiteStorage:
     def __exit__(self, *_exc):
         self.close()
 
-    def _put(self, item: object) -> None:
+    def _put(self, item: object, *, preserve_review_hold: bool = True) -> None:
         model = type(item)
         table = TABLES[model]
         # A human rejection is durable across later collection, parsing and
@@ -218,6 +218,12 @@ class SQLiteStorage:
                         item.review_reasons = list(existing_payload["review_reasons"])
                     elif "reasons" in existing_payload:
                         item.reasons = list(existing_payload["reasons"])
+                elif (preserve_review_hold and model in (models.POICandidate, models.POI) and
+                      "LOCATION_VERIFICATION_HOLD" in existing_payload.get("review_reasons", [])):
+                    item.review_status = "NEEDS_REVIEW"
+                    item.review_reasons = list(existing_payload["review_reasons"])
+                    if model is models.POI:
+                        item.map_visibility = False
         payload = json.dumps(asdict(item), ensure_ascii=False, sort_keys=True)
         values = {"id": item.id, "data": payload}
         if model is models.RawSourceRecord:
@@ -331,7 +337,7 @@ class SQLiteStorage:
                 if latest and latest["action"] == current_decision.action and latest["new_status"] == current_decision.new_status:
                     raise ValueError("duplicate review operation")
             for item in items:
-                self._put(item)
+                self._put(item, preserve_review_hold=False)
             for current_decision in decisions:
                 self.connection.execute(
                     "INSERT INTO review_decisions(id,target_type,target_id,previous_status,new_status,action,created_at,data) "

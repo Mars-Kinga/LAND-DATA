@@ -1,0 +1,21 @@
+{
+  "capture_manifest_sha256": "5cae01939ee4bf76535b5aa2d6e3544368f0d8d34b12302237778f6f6d2de5c6",
+  "counts": {
+    "city:Hanoi": 100,
+    "city:New York": 400,
+    "current:ambiguous_name_address_match": 8,
+    "current:coordinate_comparable": 23,
+    "current:no_unique_name_address_match": 365,
+    "current:unique_name_address_match": 24,
+    "historical:camis_not_found": 307,
+    "historical:duplicate_camis_rows": 22,
+    "historical:single_camis_row": 68,
+    "platform:nyc-open-data-restaurants": 397,
+    "platform:osm": 103,
+    "total": 500
+  },
+  "current_dot_sha256": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c",
+  "historical_dot_sha256": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d",
+  "packet_sha256": "90a35f98b3d4e21762906ae2da7c4d50c2018bceae374df247747a7bc396b121",
+  "scope": "Source-availability screening only; not Gold, location accuracy, or a locked-test split"
+}

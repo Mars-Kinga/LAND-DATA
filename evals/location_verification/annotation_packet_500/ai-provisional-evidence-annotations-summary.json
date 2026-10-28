@@ -1,0 +1,35 @@
+{
+  "annotation_count": 655,
+  "daily_count": 500,
+  "daily_missing_field_counts": {
+    "address": 54,
+    "coordinates": 10,
+    "name": 8
+  },
+  "gold_labels": 0,
+  "hard_coordinate_status_counts": {
+    "CROSS_SOURCE_AGREEMENT": 16,
+    "CROSS_SOURCE_CONFLICT": 20,
+    "UNKNOWN": 119
+  },
+  "hard_count": 155,
+  "hard_identity_status_counts": {
+    "CONFLICTING": 2,
+    "PLAUSIBLE_MATCH_NOT_CONFIRMED": 35,
+    "UNKNOWN": 118
+  },
+  "input_hashes": {
+    "daily": "90a35f98b3d4e21762906ae2da7c4d50c2018bceae374df247747a7bc396b121",
+    "hard_dossiers": "2d6719b4568fa55382a22121a406649dfb49493b3af10fd6623188ed9b698ac5",
+    "shortlist": "fd2adfee9ba45a62c98df40a26c9817f053458d652254d8a08f6972f747e1629"
+  },
+  "locked_split_assigned": false,
+  "next_action_counts": {
+    "COLLECT_CURRENT_INDEPENDENT_EVIDENCE": 567,
+    "HUMAN_COORDINATE_REVIEW": 18,
+    "HUMAN_DISAMBIGUATION": 2,
+    "REPAIR_INPUT_AND_COLLECT_EVIDENCE": 68
+  },
+  "output_sha256": "2f0af953a75c89224dbca78f592fae5acc907e34c6f6aa3696bb7c37cdb3619b",
+  "scope": "Single-AI provisional evidence triage, not human Gold or location accuracy"
+}

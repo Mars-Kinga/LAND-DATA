@@ -1,0 +1,191 @@
+{
+  "capture_manifest": {
+    "bytes": 2250,
+    "datasets": {
+      "current": {
+        "capture_file_mtime": "2026-10-27T17:27:36.323185+00:00",
+        "count_matches_payload": true,
+        "dataset_id": "fpeh-f7ci",
+        "resource_url": "https://data.cityofnewyork.us/resource/fpeh-f7ci.json",
+        "rows": 2516,
+        "rows_updated_at": "2026-10-27T12:30:48+00:00",
+        "select": "business_legal_name,assumed_name_s,street,city,borough,postcode,license_type,license_status,license_issue_date,license_expiration_date,latitude,longitude,bin,bbl"
+      },
+      "historical": {
+        "capture_file_mtime": "2026-10-27T17:28:25.655850+00:00",
+        "count_matches_payload": true,
+        "dataset_id": "pitm-atqc",
+        "resource_url": "https://data.cityofnewyork.us/resource/pitm-atqc.json",
+        "rows": 14428,
+        "rows_updated_at": "2023-08-03T19:30:18+00:00",
+        "select": "objectid,restaurant_name,legal_business_name,doing_business_as_dba,bulding_number,street,borough,zip,business_address,food_service_establishment,time_of_submission,latitude,longitude"
+      }
+    },
+    "generated_at": "2026-10-27T17:28:46.392620+00:00",
+    "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/capture-manifest.json",
+    "schema_version": "lv-dot-cross-source-capture-v1",
+    "sha256": "5cae01939ee4bf76535b5aa2d6e3544368f0d8d34b12302237778f6f6d2de5c6"
+  },
+  "claim_boundary": "Current DOT unique name+address is retrieval coverage only; field metrics are cross-source consistency diagnostics. Historical DOT CAMIS comparisons are historical and cannot prove current operation. Neither is an independent Gold or formal Agent accuracy.",
+  "current_dot": {
+    "any_name_address_match": {
+      "count": 73,
+      "denominator": 790,
+      "rate": 0.092405
+    },
+    "coverage": {
+      "count": 56,
+      "denominator": 790,
+      "rate": 0.070886
+    },
+    "denominator_note": "Unique name+address is a conservative retrieval/coverage condition, not a correctness label. Coordinate comparable coverage is reported over unique matches; coordinate threshold rates use only the comparable subset. Status results are field-level consistency diagnostics among unique matches.",
+    "index": {
+      "ambiguous_name_address_keys": 447,
+      "rows_missing_name_or_address": 0,
+      "rows_total": 2516,
+      "unique_name_address_keys": 1622
+    },
+    "match_counts": {
+      "ambiguous_name_address_match": 17,
+      "candidate_missing_name_or_address": 10,
+      "no_unique_name_address_match": 717,
+      "unique_name_address_match": 56
+    },
+    "metrics_after_unique_match": {
+      "coordinate_comparable_coverage": {
+        "count": 54,
+        "denominator": 56,
+        "rate": 0.964286
+      },
+      "coordinate_within_10m": {
+        "count": 54,
+        "denominator": 54,
+        "rate": 1.0
+      },
+      "coordinate_within_50m": {
+        "count": 54,
+        "denominator": 54,
+        "rate": 1.0
+      },
+      "dot_status_field_present": {
+        "count": 56,
+        "denominator": 56,
+        "rate": 1.0
+      }
+    },
+    "queue_scope": {
+      "name_address_key_eligible": 790,
+      "nyc_rows": 800
+    },
+    "snapshot_filter": {
+      "candidate_scope": "queue city normalized to New York",
+      "dot_rows_used": "all rows with non-empty name and full address",
+      "dot_rows_without_key": 0,
+      "match_key": "exact normalized name + exact normalized full address; unique DOT row required",
+      "status_filter": "none"
+    },
+    "snapshot_rows": 2516
+  },
+  "historical_dot": {
+    "coverage": {
+      "count": 198,
+      "denominator": 790,
+      "rate": 0.250633
+    },
+    "denominator_note": "CAMIS join coverage is a cross-source linkage diagnostic. Address and coordinate rates exclude missing candidate fields and any duplicate CAMIS field conflict. Historical DOT data cannot prove current operation.",
+    "duplicate_diagnostics": {
+      "field_missing_or_conflict": 57,
+      "matched_cases_with_duplicate_rows": 57,
+      "uniform_selected_fields": 0
+    },
+    "index": {
+      "duplicate_camis_groups": 2472,
+      "duplicate_extra_rows": 3177,
+      "rows_missing_camis": 2,
+      "rows_total": 14428,
+      "unique_camis": 11249
+    },
+    "match_counts": {
+      "camis_not_found": 592,
+      "duplicate_camis_rows": 57,
+      "queue_row_not_dohmh_camis": 10,
+      "single_camis_row": 141
+    },
+    "metrics_after_camis_match": {
+      "address_equal": {
+        "count": 114,
+        "denominator": 174,
+        "rate": 0.655172
+      },
+      "coordinate_within_10m": {
+        "count": 162,
+        "denominator": 168,
+        "rate": 0.964286
+      },
+      "coordinate_within_50m": {
+        "count": 165,
+        "denominator": 168,
+        "rate": 0.982143
+      }
+    },
+    "queue_scope": {
+      "camis_join_eligible": 790,
+      "nyc_rows": 800
+    },
+    "snapshot_filter": {
+      "candidate_scope": "queue city normalized to New York",
+      "dot_rows_used": "all rows with non-empty food_service_establishment/CAMIS",
+      "duplicate_policy": "retain all rows; a field enters comparison denominator only when every duplicate row has a non-empty identical value",
+      "join_scope": "platform=nyc-open-data-restaurants and numeric source.external_id"
+    },
+    "snapshot_rows": 14428
+  },
+  "inputs": {
+    "current": {
+      "bytes": 1039356,
+      "label": "current",
+      "metadata": {},
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/current.json",
+      "records": 2516,
+      "sha256": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c"
+    },
+    "historical": {
+      "bytes": 5937106,
+      "label": "historical",
+      "metadata": {},
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/historical.json",
+      "records": 14428,
+      "sha256": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d"
+    }
+  },
+  "manifest": {
+    "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_cross_source_results/dot-cross-source-manifest.json"
+  },
+  "private_cases": {
+    "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_cross_source_results/dot-cross-source-cases.jsonl",
+    "rows": 1600,
+    "sha256": "f4f8e03f46f8b710708273e3f0b819d1eb4bcdbb35df35e40349fafa3a0f10f3"
+  },
+  "queue": {
+    "bytes": 1405575,
+    "city_counts": {
+      "Hanoi": 200,
+      "New York": 800
+    },
+    "invalid_rows": 0,
+    "nyc_camis_rows": 790,
+    "nyc_rows": 800,
+    "path": "/Users/mars/Downloads/LAND-DATA/.local/baselines/location-verification-pre-agent-final-2026-10-28/screening/location-verification-screening-2026-10-28.jsonl",
+    "platform_counts": {
+      "nyc-open-data-restaurants": 790,
+      "osm": 210
+    },
+    "rows": 1000,
+    "sha256": "9de97eeae5d4ea9badb5677e727faa6d4659887c913e8b394fdca66f112b1e86",
+    "source_collected_at_max": "2026-10-18T15:17:04.402639Z",
+    "source_collected_at_min": "2026-09-23T01:03:37.308983Z"
+  },
+  "run_id": "20261028T000000Z",
+  "schema_version": "lv-dot-cross-source-v1",
+  "script_sha256": "2823775092cdefcfe3612c21de9e98b91c431df19faefed56f06a16903490b4c"
+}

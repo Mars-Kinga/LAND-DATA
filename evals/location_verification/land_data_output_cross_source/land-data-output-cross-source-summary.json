@@ -1,0 +1,422 @@
+{
+  "claim_boundary": "This is a frozen LAND-DATA output and cross-source consistency diagnostic. Current DOT unique name+address and historical CAMIS linkage are not human Gold labels; historical DOT cannot prove current operation. No Agent accuracy or pre/post improvement is claimed.",
+  "current_dot": {
+    "any_name_address_match": {
+      "count": 1310,
+      "denominator": 12693,
+      "rate": 0.103206
+    },
+    "candidate_scope": {
+      "name_address_key_eligible": 12693,
+      "rows": 12693
+    },
+    "denominator_note": "The current DOT name+address key is a retrieval/coverage condition, not a correctness label. Coordinate rates use only unique matches with two valid coordinates. Values over 10m or 50m are field conflicts and are grouped by the frozen legacy candidate review_status.",
+    "index": {
+      "ambiguous_name_address_keys": 447,
+      "rows_missing_name_or_address": 0,
+      "rows_total": 2516,
+      "unique_name_address_keys": 1622
+    },
+    "legacy_status_breakdown": {
+      "AUTO_APPROVED": {
+        "ambiguous_name_address_match": 289,
+        "candidate_missing_name_or_address": 0,
+        "candidate_rows": 12609,
+        "coordinate_comparable": {
+          "count": 1004,
+          "denominator": 1019,
+          "rate": 0.98528
+        },
+        "coordinate_over_10m": {
+          "count": 20,
+          "denominator": 1004,
+          "rate": 0.01992
+        },
+        "coordinate_over_50m": {
+          "count": 3,
+          "denominator": 1004,
+          "rate": 0.002988
+        },
+        "coordinate_within_10m": {
+          "count": 984,
+          "denominator": 1004,
+          "rate": 0.98008
+        },
+        "coordinate_within_50m": {
+          "count": 1001,
+          "denominator": 1004,
+          "rate": 0.997012
+        },
+        "name_address_key_eligible": 12609,
+        "no_unique_name_address_match": 11301,
+        "unique_name_address_match": {
+          "count": 1019,
+          "denominator": 12609,
+          "rate": 0.080815
+        }
+      },
+      "NEEDS_REVIEW": {
+        "ambiguous_name_address_match": 1,
+        "candidate_missing_name_or_address": 0,
+        "candidate_rows": 84,
+        "coordinate_comparable": {
+          "count": 0,
+          "denominator": 1,
+          "rate": 0.0
+        },
+        "coordinate_over_10m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "coordinate_over_50m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "coordinate_within_10m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "coordinate_within_50m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "name_address_key_eligible": 84,
+        "no_unique_name_address_match": 82,
+        "unique_name_address_match": {
+          "count": 1,
+          "denominator": 84,
+          "rate": 0.011905
+        }
+      },
+      "__all__": {
+        "ambiguous_name_address_match": 290,
+        "candidate_missing_name_or_address": 0,
+        "candidate_rows": 12693,
+        "coordinate_comparable": {
+          "count": 1004,
+          "denominator": 1020,
+          "rate": 0.984314
+        },
+        "coordinate_over_10m": {
+          "count": 20,
+          "denominator": 1004,
+          "rate": 0.01992
+        },
+        "coordinate_over_50m": {
+          "count": 3,
+          "denominator": 1004,
+          "rate": 0.002988
+        },
+        "coordinate_within_10m": {
+          "count": 984,
+          "denominator": 1004,
+          "rate": 0.98008
+        },
+        "coordinate_within_50m": {
+          "count": 1001,
+          "denominator": 1004,
+          "rate": 0.997012
+        },
+        "name_address_key_eligible": 12693,
+        "no_unique_name_address_match": 11383,
+        "unique_name_address_match": {
+          "count": 1020,
+          "denominator": 12693,
+          "rate": 0.080359
+        }
+      }
+    },
+    "match_counts": {
+      "ambiguous_name_address_match": 290,
+      "no_unique_name_address_match": 11383,
+      "unique_name_address_match": 1020
+    },
+    "metrics_after_unique_match": {
+      "coordinate_comparable": {
+        "count": 1004,
+        "denominator": 1020,
+        "rate": 0.984314
+      },
+      "coordinate_over_10m": {
+        "count": 20,
+        "denominator": 1004,
+        "rate": 0.01992
+      },
+      "coordinate_over_50m": {
+        "count": 3,
+        "denominator": 1004,
+        "rate": 0.002988
+      },
+      "coordinate_within_10m": {
+        "count": 984,
+        "denominator": 1004,
+        "rate": 0.98008
+      },
+      "coordinate_within_50m": {
+        "count": 1001,
+        "denominator": 1004,
+        "rate": 0.997012
+      }
+    },
+    "snapshot_filter": {
+      "candidate_scope": "all frozen New York DOHMH poi_candidates joined to source_contents",
+      "dot_rows_used": "all current DOT rows with non-empty normalized name and full address",
+      "match_key": "exact normalized candidate name + exact normalized candidate full address; unique DOT row required",
+      "status_filter": "none"
+    },
+    "snapshot_rows": 2516,
+    "unique_name_address_match": {
+      "count": 1020,
+      "denominator": 12693,
+      "rate": 0.080359
+    }
+  },
+  "historical_dot": {
+    "camis_match": {
+      "count": 3164,
+      "denominator": 12693,
+      "rate": 0.249271
+    },
+    "candidate_scope": {
+      "camis_join_eligible": 12693,
+      "rows": 12693
+    },
+    "denominator_note": "Historical DOT CAMIS linkage is a cross-source historical consistency diagnostic. Address and coordinate rates exclude missing candidate fields and duplicate CAMIS conflicts. The 2023 historical snapshot cannot prove that a place is currently open and is not a current-business Gold label.",
+    "duplicate_diagnostics": {
+      "field_missing_or_conflict": 831,
+      "matched_cases_with_duplicate_rows": 831,
+      "uniform_selected_fields": 0
+    },
+    "index": {
+      "duplicate_camis_groups": 2472,
+      "duplicate_extra_rows": 3177,
+      "rows_missing_camis": 2,
+      "rows_total": 14428,
+      "unique_camis": 11249
+    },
+    "legacy_status_breakdown": {
+      "AUTO_APPROVED": {
+        "address_equal": {
+          "count": 1845,
+          "denominator": 2749,
+          "rate": 0.671153
+        },
+        "camis_match": {
+          "count": 3155,
+          "denominator": 12609,
+          "rate": 0.250218
+        },
+        "candidate_rows": 12609,
+        "coordinate_within_10m": {
+          "count": 2641,
+          "denominator": 2751,
+          "rate": 0.960015
+        },
+        "coordinate_within_50m": {
+          "count": 2682,
+          "denominator": 2751,
+          "rate": 0.974918
+        },
+        "duplicate_field_conflict_or_missing": 830,
+        "duplicate_rows": 830
+      },
+      "NEEDS_REVIEW": {
+        "address_equal": {
+          "count": 3,
+          "denominator": 9,
+          "rate": 0.333333
+        },
+        "camis_match": {
+          "count": 9,
+          "denominator": 84,
+          "rate": 0.107143
+        },
+        "candidate_rows": 84,
+        "coordinate_within_10m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "coordinate_within_50m": {
+          "count": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "duplicate_field_conflict_or_missing": 1,
+        "duplicate_rows": 1
+      },
+      "__all__": {
+        "address_equal": {
+          "count": 1848,
+          "denominator": 2758,
+          "rate": 0.670051
+        },
+        "camis_match": {
+          "count": 3164,
+          "denominator": 12693,
+          "rate": 0.249271
+        },
+        "candidate_rows": 12693,
+        "coordinate_within_10m": {
+          "count": 2641,
+          "denominator": 2751,
+          "rate": 0.960015
+        },
+        "coordinate_within_50m": {
+          "count": 2682,
+          "denominator": 2751,
+          "rate": 0.974918
+        },
+        "duplicate_field_conflict_or_missing": 831,
+        "duplicate_rows": 831
+      }
+    },
+    "match_counts": {
+      "camis_not_found": 9529,
+      "duplicate_camis_rows": 831,
+      "single_camis_row": 2333
+    },
+    "metrics_after_camis_match": {
+      "address_equal": {
+        "count": 1848,
+        "denominator": 2758,
+        "rate": 0.670051
+      },
+      "coordinate_within_10m": {
+        "count": 2641,
+        "denominator": 2751,
+        "rate": 0.960015
+      },
+      "coordinate_within_50m": {
+        "count": 2682,
+        "denominator": 2751,
+        "rate": 0.974918
+      }
+    },
+    "snapshot_filter": {
+      "candidate_scope": "all frozen New York DOHMH poi_candidates joined to source_contents",
+      "dot_rows_used": "all historical DOT rows with non-empty food_service_establishment/CAMIS",
+      "duplicate_policy": "retain all rows; a field enters its denominator only when every duplicate row is non-empty and identical",
+      "join_scope": "numeric source_contents.external_id/CAMIS"
+    },
+    "snapshot_rows": 14428
+  },
+  "inputs": {
+    "current_dot": {
+      "bytes": 1039356,
+      "label": "current",
+      "metadata": {},
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/current.json",
+      "records": 2516,
+      "sha256": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c"
+    },
+    "dot_capture_manifest": {
+      "bytes": 2250,
+      "datasets": {
+        "current": {
+          "capture_file_mtime": "2026-10-27T17:27:36.323185+00:00",
+          "count_matches_payload": true,
+          "dataset_id": "fpeh-f7ci",
+          "resource_url": "https://data.cityofnewyork.us/resource/fpeh-f7ci.json",
+          "rows": 2516,
+          "rows_updated_at": "2026-10-27T12:30:48+00:00",
+          "select": "business_legal_name,assumed_name_s,street,city,borough,postcode,license_type,license_status,license_issue_date,license_expiration_date,latitude,longitude,bin,bbl"
+        },
+        "historical": {
+          "capture_file_mtime": "2026-10-27T17:28:25.655850+00:00",
+          "count_matches_payload": true,
+          "dataset_id": "pitm-atqc",
+          "resource_url": "https://data.cityofnewyork.us/resource/pitm-atqc.json",
+          "rows": 14428,
+          "rows_updated_at": "2023-08-03T19:30:18+00:00",
+          "select": "objectid,restaurant_name,legal_business_name,doing_business_as_dba,bulding_number,street,borough,zip,business_address,food_service_establishment,time_of_submission,latitude,longitude"
+        }
+      },
+      "generated_at": "2026-10-27T17:28:46.392620+00:00",
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/capture-manifest.json",
+      "schema_version": "lv-dot-cross-source-capture-v1",
+      "sha256": "5cae01939ee4bf76535b5aa2d6e3544368f0d8d34b12302237778f6f6d2de5c6"
+    },
+    "freeze_manifest": {
+      "bytes": 25482,
+      "database": {
+        "bytes": 212193280,
+        "path": "/Users/mars/Downloads/LAND-DATA/.local/baselines/location-verification-pre-agent-final-2026-10-28/nyc-incremental-acceptance-v2.db",
+        "quick_check_from_manifest": "ok",
+        "sha256": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11",
+        "snapshot": "nyc-incremental-acceptance-v2.db"
+      },
+      "git_head": "c05bb3694790dc7b52f4ef2d9b63a8af3e3ffc9a",
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/baselines/location-verification-pre-agent-final-2026-10-28/manifest.json",
+      "schema_version": "location-verification-pre-agent-freeze-v1",
+      "sha256": "922931df7d3a57bda867131c7b8890dc7442067c7b29b1a9c0d9f49e4a4230f2"
+    },
+    "historical_dot": {
+      "bytes": 5937106,
+      "label": "historical",
+      "metadata": {},
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/dot_batches/historical.json",
+      "records": 14428,
+      "sha256": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d"
+    }
+  },
+  "land_data_output": {
+    "candidate_city_counts": {
+      "New York": 12693
+    },
+    "candidate_status_counts": {
+      "AUTO_APPROVED": 12609,
+      "NEEDS_REVIEW": 84
+    },
+    "database": {
+      "bytes": 212193280,
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/baselines/location-verification-pre-agent-final-2026-10-28/nyc-incremental-acceptance-v2.db",
+      "quick_check": "ok",
+      "quick_check_from_manifest": "ok",
+      "sha256": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11",
+      "snapshot": "nyc-incremental-acceptance-v2.db"
+    },
+    "distinct_poi_status_conflict_count": 0,
+    "distinct_poi_status_counts": {
+      "AUTO_APPROVED": 12580
+    },
+    "distinct_resolved_poi_ids": 12580,
+    "freeze_manifest_schema": "location-verification-pre-agent-freeze-v1",
+    "freeze_manifest_sha256": "922931df7d3a57bda867131c7b8890dc7442067c7b29b1a9c0d9f49e4a4230f2",
+    "linked_poi_status_counts_by_candidate_row": {
+      "AUTO_APPROVED": 12609
+    },
+    "linked_resolved_rows_missing_poi": 0,
+    "poi_candidates": 12693,
+    "resolved_candidate_count": 12609,
+    "resolved_candidate_counts_by_status": {
+      "AUTO_APPROVED": 12609
+    },
+    "source_contents": 12693,
+    "source_record_date_counts": {
+      "2026-09-21T06:00:12.000": 2,
+      "2026-09-21T06:00:17.000": 1,
+      "2026-09-22T06:00:13.000": 25,
+      "2026-09-22T06:00:18.000": 3,
+      "2026-09-23T06:00:16.000": 59,
+      "2026-09-23T06:00:18.000": 3,
+      "2026-09-23T06:00:21.000": 9,
+      "2026-10-16T06:00:15.000": 10706,
+      "2026-10-16T06:00:17.000": 145,
+      "2026-10-16T06:00:21.000": 1740
+    },
+    "unresolved_candidate_count": 84
+  },
+  "private_cases": {
+    "path": "/Users/mars/Downloads/LAND-DATA/.local/location-verification-live-check/land_data_output_cross_source/land-data-output-cross-source-cases.jsonl",
+    "rows": 25386,
+    "sha256": "c530dcbcefb8499aea7d79f033f4136223391c83e3e23f4f38f7610be451e206"
+  },
+  "run_id": "20261028T000000Z",
+  "schema_version": "lv-land-data-output-cross-source-v1",
+  "script_sha256": "6ed88ecda814e292dd539a799ab3f4fcd160581487168707a81280173071ed82"
+}

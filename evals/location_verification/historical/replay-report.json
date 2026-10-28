@@ -1,0 +1,212 @@
+{
+  "dataset": {
+    "kind": "historical_reference_set",
+    "independent_accuracy_evaluation": false,
+    "interpretation": "These 51 records were already reviewed. They are suitable for schema/provenance/replay checks and historical reference, but must not be reported as an independent before/after accuracy test.",
+    "verified_at": "2026-09-29",
+    "scope": "Merged XHS Hanoi venue verification audit"
+  },
+  "input_files": {
+    "docs/xhs-verification-a.json": "e773342d8e12b050ac5a80f813738d0627510f9c194e64df2e3756d271de726a",
+    "docs/xhs-verification-b.json": "06cf60d3b2db7ae3d7761bc15fe2eff640932c4db197364b04a4fd95d53ba921",
+    "docs/xhs-verification-c.json": "8ada2ad8addfd806b358bd8bab7a8dc0cb9828e131a4b4add5646b44866dec5b",
+    "docs/xhs-verification-final.json": "519ab7a52bbba25ac6068a2bcd21c5fe533bc53e1ad5937f2f63edcd9aaaac96"
+  },
+  "source_shapes": {
+    "docs/xhs-verification-a.json": {
+      "top_level": "object",
+      "record_count": 17,
+      "keys": [
+        "counts",
+        "items",
+        "scope",
+        "verifiedAt"
+      ]
+    },
+    "docs/xhs-verification-b.json": {
+      "top_level": "object",
+      "record_count": 17,
+      "keys": [
+        "counts",
+        "items",
+        "scope",
+        "verifiedAt"
+      ]
+    },
+    "docs/xhs-verification-c.json": {
+      "top_level": "array",
+      "record_count": 17,
+      "keys": null
+    }
+  },
+  "record_counts": {
+    "source_records": 51,
+    "final_rawResults": 51,
+    "final_uniqueEntities": 47,
+    "dedupe_removed": 4,
+    "duplicate_groups": 3
+  },
+  "status_distribution": {
+    "CONFIRMED": 38,
+    "CONFLICT": 9,
+    "NOT_FOUND": 4
+  },
+  "missing_fields": {
+    "all_records": {
+      "index": 0,
+      "name": 0,
+      "canonicalName": 0,
+      "address": 4,
+      "latitude": 11,
+      "longitude": 11,
+      "category": 0,
+      "status": 0,
+      "confidence": 0,
+      "primarySourceURL": 0,
+      "secondarySourceURL": 0,
+      "notes": 0
+    },
+    "by_status": {
+      "CONFIRMED": {
+        "index": 0,
+        "name": 0,
+        "canonicalName": 0,
+        "address": 0,
+        "latitude": 0,
+        "longitude": 0,
+        "category": 0,
+        "status": 0,
+        "confidence": 0,
+        "primarySourceURL": 0,
+        "secondarySourceURL": 0,
+        "notes": 0
+      },
+      "CONFLICT": {
+        "index": 0,
+        "name": 0,
+        "canonicalName": 0,
+        "address": 4,
+        "latitude": 7,
+        "longitude": 7,
+        "category": 0,
+        "status": 0,
+        "confidence": 0,
+        "primarySourceURL": 0,
+        "secondarySourceURL": 0,
+        "notes": 0
+      },
+      "NOT_FOUND": {
+        "index": 0,
+        "name": 0,
+        "canonicalName": 0,
+        "address": 0,
+        "latitude": 4,
+        "longitude": 4,
+        "category": 0,
+        "status": 0,
+        "confidence": 0,
+        "primarySourceURL": 0,
+        "secondarySourceURL": 0,
+        "notes": 0
+      }
+    }
+  },
+  "source_coverage": {
+    "records": 51,
+    "primary_missing": 0,
+    "secondary_missing": 0,
+    "either_missing": 0,
+    "both_present": 51
+  },
+  "duplicate_groups": [
+    {
+      "dedupe_key": "cà phê giảng",
+      "canonical_name": "Cà Phê Giảng",
+      "candidate_indexes": [
+        38,
+        50
+      ],
+      "count": 2
+    },
+    {
+      "dedupe_key": "may kitchenware",
+      "canonical_name": "MAY KITCHENWARE",
+      "candidate_indexes": [
+        12,
+        28
+      ],
+      "count": 2
+    },
+    {
+      "dedupe_key": "the haflington",
+      "canonical_name": "The Haflington",
+      "candidate_indexes": [
+        14,
+        18,
+        51
+      ],
+      "count": 3
+    }
+  ],
+  "replay_checks": {
+    "source_indices_contiguous_1_to_51": true,
+    "source_records_match_final_rawResults": true,
+    "source_dedupe_matches_final_uniqueEntities": true,
+    "final_summary_matches_source": true,
+    "all_passed": true
+  },
+  "normalized_records_sha256": "0f0dbde40a1efe7e798a3967b9abd96fc95df2994cd813aeb19d7c13a783077e",
+  "record_sha256": {
+    "1": "16a78c1ec73a66e92c46a1b449b23d3c416d89f1c7332b278a87a263e849adc2",
+    "2": "07002a9e4214d6324621c08cba9b38c3b2751e54b6db476acfc580c56124280d",
+    "3": "39a015d2393ac0af015842ba6e0ea62e039a191c4d556fcd7eff484c4c9915b0",
+    "4": "33ad1f94417ba5e7b397d941ecbecf8edf34fda4d30892d53142c764ecd5334a",
+    "5": "885b5b9dfc1aadf475b106be56cc13fa39b4b314d7059486010b4d12a63308f8",
+    "6": "537c6669390c9a3d86a10ab0540c26853014d2b6b53fef97e7898c441f64d564",
+    "7": "40d876adc422adf7a6b97b191fcc559fbefb11a4ec53cc5bb3651109f84e6c69",
+    "8": "a6c8fd413efc48bb9551831269d2afd09095f48524dc460effe476fb6b6bc4b8",
+    "9": "cdfd202a712836351ff5733e76dc7537a8bad8042cd3161ad7df56edb0091022",
+    "10": "d24a0557491279a745f1408842d25786734ccdd2d4e41ba587521672d614e9e3",
+    "11": "2c8c680c4b6c11795e43aea6c0773fbb6b2daf05d8ee5f67e15cc24c16c16fcb",
+    "12": "a9f88830a75a19d4df33186562f042d6654908a0c3b3f331010ba49a42693ff3",
+    "13": "03df90e854ad5dbd08f65ec1e5acd2cc861e47ede2cc61cde3f00204cf3cc506",
+    "14": "e4cf475352fb98b88910a460daea573a1f5cee0b76610f8b78744e63010a78fd",
+    "15": "6445d592356a7a7f193298d1c3c2c7050a3b08106b19a2851ea6d4376c037554",
+    "16": "004626822a5ab4a8408e79414f6878300784fca2797e8db10f6d6806de9179ae",
+    "17": "78fe408821d2d8412ab0dbb34383824e1a51e0ff618d6ba9e3a651432a8eb140",
+    "18": "c1ddac688992a87d1a191b091afc4c9f377faca60f333a55ad4a615be87ac3d9",
+    "19": "f6c29f1580ed6b91c5431dee36e9c4ba14f49e1220326748f74dd1dc7608b8a1",
+    "20": "63f29df5b960f168fc36c3040b27eb8aa28e1e01d0b2535119e7fbdaa71e03af",
+    "21": "ef26d7c154f0218b089ec599d2f1431e9abe62a42c8b91e6b5a8f03e8d9e32d5",
+    "22": "57d23c9f65ff8dc2b64df7fbca0ee7880d99950b4a296d13e31857e89524bd33",
+    "23": "7550b425a57dda77c4e40cd0d2e1238f8c5fceb1afa45c8c5b613bef9608fe73",
+    "24": "b14d0481381d98d66cc786cc166e7a73ac82520f023cc00a61d33504613137fe",
+    "25": "7b3dc859abcaf020f58c63fb323a5bf035f06443c00b28217fd219f5f558af8e",
+    "26": "9bb6d4d744fc64083868cd4abc128ad010e00f130853b63b7e10d75c203300f7",
+    "27": "c4c7f311d24ed79308ec80aa11c8b377448099a7a1c570dfb9799af058026681",
+    "28": "f2bd985f4a69da1a4dcc80e49f88d9b8f2877b0b0c595e17aa3bffe365b1c627",
+    "29": "593b88ddc7c0c51a667298eb9e78ab39b24200606cd0c772cbfb4cfa12387e81",
+    "30": "9af8f5fd8dc233933acf3dd4888668f232d1c993dd3101b847cab3ccadc9c34e",
+    "31": "07e967a9cb5363bbdd9729cea145a2ea32eecedc4a84acd8266cc439d1c8e5fc",
+    "32": "4745a670ddb56c4e61ac5a9c7c0714cb1bdc7a3e4a3245cc67fc556b1551bd8f",
+    "33": "04a8deec7ae05ecf6336395ab5d2b4db2e8b23edb58fe0c393b57dccaf73a908",
+    "34": "349854b3e551614d935a7c1c65d3e46e213b922b690877400b5546bb0032be46",
+    "35": "38e80d50e95ce61790575df404ddcaacd8dde7d5f27ec9bb8cbcdd4bbab2517f",
+    "36": "b9e898295ec26aefb22150a29178546b9dfa595e1c866a8267c9912ffa7ab976",
+    "37": "7a40f7817748f446c06ccf0546402ce5056a74bf1f5077b299e8ce77d5860549",
+    "38": "5303315425cde25b23ad9e73e2966b59b8a5a8287529d0d6d6929a15a9065e0b",
+    "39": "1568133b91d931bfa815405be9d8749b4b3132b1bebbdf907494c94a2f216831",
+    "40": "71f6dd03a97239e0226d152dd786d320b9520692b8d389dd4f8cce51414b3852",
+    "41": "f10f58ae3c945a4136608b93af0db0fb1505da47b551fc00262cfc9fc37cf219",
+    "42": "380815ffa4ca42d8be4a56d1a420b4c49d07183a034cb99085873a768fe9efd3",
+    "43": "4695c119c87a4b275440965d82b3f1679881ef1b275d2956ecd2242c25404f1f",
+    "44": "ef39e51da35d4a911696541a5dc608a558eea5ae5e20ab9ae57d41461ce3aacf",
+    "45": "55a14aca4f12c5cd236af6f3c330ec7c925e66bb59a98eeb7b719824818485b0",
+    "46": "29a155c2c80d12f307ea0b244a1fdab6270c3c19cd05ed36c2c3a57e8f7a258d",
+    "47": "2ccda62cd6083a1781e195df88ec4bea85c6a7ce7a35f9d6c9609e894420ce76",
+    "48": "7dac7a8fa9834f283ab92969c9df5c342e523c36e53c5ceed89c4a2df82978e3",
+    "49": "52969526c141a8270f817bfb04d88fb26c2367d3e7b9e528a3d4a7aa67c8cd3e",
+    "50": "9122172823081bf680d9dfb7d84f4976be8f4a247d985011c7e2ba40a07cd35d",
+    "51": "0a25ecd4586077dc8061512726c5185b531aed27e93b393bb9a05e010de2d51c"
+  }
+}

@@ -408,13 +408,17 @@ def resolve(storage: Storage, only_candidate_ids=None) -> None:
 
 def validate_score_review(storage: Storage, visibility_threshold: float) -> None:
     for poi in storage.all(POI):
+        verification_hold = "LOCATION_VERIFICATION_HOLD" in poi.review_reasons
         poi.validation_passed = valid_coordinates(poi.latitude, poi.longitude) and bool(poi.names) and bool(poi.city)
         poi.quality_score = round(min(1.0, poi.confidence_score * (1.0 if poi.address else 0.9)), 3)
         if poi.review_status != "REJECTED":
-            poi.review_reasons = [] if poi.validation_passed else [
-                "INVALID_COORDINATES" if not valid_coordinates(poi.latitude, poi.longitude)
-                else "MISSING_REQUIRED_FIELD"]
-            poi.review_status = "AUTO_APPROVED" if poi.validation_passed and poi.coordinates_verified else "NEEDS_REVIEW"
+            if verification_hold:
+                poi.review_status = "NEEDS_REVIEW"
+            else:
+                poi.review_reasons = [] if poi.validation_passed else [
+                    "INVALID_COORDINATES" if not valid_coordinates(poi.latitude, poi.longitude)
+                    else "MISSING_REQUIRED_FIELD"]
+                poi.review_status = "AUTO_APPROVED" if poi.validation_passed and poi.coordinates_verified else "NEEDS_REVIEW"
         poi.map_visibility = (poi.validation_passed and poi.coordinates_verified and poi.active and
                               poi.review_status == "AUTO_APPROVED" and poi.confidence_score >= visibility_threshold)
         storage.put(poi)

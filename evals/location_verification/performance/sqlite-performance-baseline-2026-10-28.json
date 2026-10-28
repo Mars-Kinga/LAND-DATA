@@ -1,0 +1,1252 @@
+{
+  "generated_at": "2026-10-27T16:51:13.423295+00:00",
+  "script": "/Users/mars/Downloads/LAND-DATA/evals/location_verification/performance/sqlite_performance_baseline.py",
+  "script_sha256": "74dcdad524480058b67832895b3b104aed078dc4793114be070583891f1b3f09",
+  "parameters": {
+    "warmups": 3,
+    "iterations": 20,
+    "limit": 1000
+  },
+  "databases": [
+    {
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/land-data.db",
+      "started_at": "2026-10-27T16:50:36.439315+00:00",
+      "ended_at": "2026-10-27T16:50:37.169210+00:00",
+      "file_fingerprint_before": {
+        "land-data.db": {
+          "bytes": 6737920,
+          "mtime_ns": 1792582523421200872,
+          "sha256": "12e291a29f88be90f9d71176cd089c992cd7fffddc8cc284f404c66632fb820a"
+        },
+        "land-data.db-wal": {
+          "bytes": 0,
+          "mtime_ns": 1793119127362451893,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "land-data.db-shm": {
+          "bytes": 32768,
+          "mtime_ns": 1793119748357298028,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        }
+      },
+      "file_fingerprint_after": {
+        "land-data.db": {
+          "bytes": 6737920,
+          "mtime_ns": 1792582523421200872,
+          "sha256": "12e291a29f88be90f9d71176cd089c992cd7fffddc8cc284f404c66632fb820a"
+        },
+        "land-data.db-wal": {
+          "bytes": 0,
+          "mtime_ns": 1793119127362451893,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "land-data.db-shm": {
+          "bytes": 32768,
+          "mtime_ns": 1793119748357298028,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        }
+      },
+      "database_unchanged": true,
+      "sqlite_snapshot": {
+        "data_version": 1,
+        "schema_version": 63,
+        "page_count": 1645,
+        "page_size": 4096,
+        "freelist_count": 0,
+        "journal_mode": "delete"
+      },
+      "tables": [
+        "content_classifications",
+        "dashboard_jobs",
+        "event_candidates",
+        "events",
+        "field_provenance",
+        "llm_extraction_cache",
+        "location_evidence",
+        "official_guidance_page_states",
+        "official_guidance_snapshots",
+        "poi_candidates",
+        "poi_mentions",
+        "pois",
+        "raw_source_records",
+        "recommendation_signals",
+        "review_decisions",
+        "source_collection_checkpoints",
+        "source_contents",
+        "source_discovery_candidates",
+        "source_discovery_checkpoints",
+        "source_discovery_runs",
+        "source_runs",
+        "xhs_capture_attempts",
+        "xhs_captures",
+        "xhs_collection_runs",
+        "xhs_knowledge_attempts",
+        "xhs_knowledge_candidates",
+        "xhs_knowledge_drafts",
+        "xhs_knowledge_review_log",
+        "xhs_processing_attempts",
+        "xhs_processing_state",
+        "xhs_query_checkpoints",
+        "xhs_query_posts"
+      ],
+      "table_counts": {
+        "content_classifications": 254,
+        "dashboard_jobs": 0,
+        "event_candidates": 1,
+        "events": 1,
+        "field_provenance": 1530,
+        "llm_extraction_cache": 0,
+        "location_evidence": 543,
+        "official_guidance_page_states": 0,
+        "official_guidance_snapshots": 0,
+        "poi_candidates": 304,
+        "poi_mentions": 34,
+        "pois": 231,
+        "raw_source_records": 532,
+        "recommendation_signals": 118,
+        "review_decisions": 292,
+        "source_collection_checkpoints": 0,
+        "source_contents": 509,
+        "source_discovery_candidates": 108,
+        "source_discovery_checkpoints": 15,
+        "source_discovery_runs": 4,
+        "source_runs": 88,
+        "xhs_capture_attempts": 278,
+        "xhs_captures": 243,
+        "xhs_collection_runs": 16,
+        "xhs_knowledge_attempts": 62,
+        "xhs_knowledge_candidates": 473,
+        "xhs_knowledge_drafts": 62,
+        "xhs_knowledge_review_log": 68,
+        "xhs_processing_attempts": 311,
+        "xhs_processing_state": 238,
+        "xhs_query_checkpoints": 22,
+        "xhs_query_posts": 305
+      },
+      "candidate_inventory": {
+        "available": true,
+        "by_city": [
+          {
+            "city": "Hanoi",
+            "candidates": 300,
+            "distinct_candidate_ids": 300,
+            "distinct_source_content_ids": 283,
+            "distinct_external_ids": 283,
+            "candidates_with_evidence": 269,
+            "candidates_with_two_evidence_types": 269,
+            "candidates_with_two_evidence_platforms": 0,
+            "evidence_rows": 538,
+            "candidates_with_source_content": 300,
+            "candidates_without_review_status": 0,
+            "candidate_created_min": "2026-09-28T11:23:54.484096Z",
+            "candidate_created_max": "2026-09-29T17:57:20.655455Z",
+            "source_collected_min": "2026-09-28T11:23:54.477295Z",
+            "source_collected_max": "2026-09-29T17:57:20.622524Z",
+            "evidence_created_min": "2026-09-28T11:23:54.484096Z",
+            "evidence_created_max": "2026-09-29T17:57:20.655455Z"
+          },
+          {
+            "city": "mock-tokyo",
+            "candidates": 4,
+            "distinct_candidate_ids": 4,
+            "distinct_source_content_ids": 4,
+            "distinct_external_ids": 4,
+            "candidates_with_evidence": 4,
+            "candidates_with_two_evidence_types": 1,
+            "candidates_with_two_evidence_platforms": 0,
+            "evidence_rows": 5,
+            "candidates_with_source_content": 4,
+            "candidates_without_review_status": 0,
+            "candidate_created_min": "2026-09-21T05:40:45.542671Z",
+            "candidate_created_max": "2026-09-21T05:40:45.553241Z",
+            "source_collected_min": "2026-09-21T05:40:31.011194Z",
+            "source_collected_max": "2026-09-21T05:40:45.540413Z",
+            "evidence_created_min": "2026-09-21T05:40:45.542671Z",
+            "evidence_created_max": "2026-09-21T05:40:45.553241Z"
+          }
+        ],
+        "by_city_and_platform": [
+          {
+            "city": "Hanoi",
+            "platform": "osm",
+            "candidates": 269,
+            "distinct_external_ids": 269,
+            "candidates_with_evidence": 269,
+            "source_collected_min": "2026-09-28T11:23:54.477295Z",
+            "source_collected_max": "2026-09-29T17:57:20.622524Z"
+          },
+          {
+            "city": "Hanoi",
+            "platform": "xiaohongshu-browser",
+            "candidates": 31,
+            "distinct_external_ids": 14,
+            "candidates_with_evidence": 0,
+            "source_collected_min": "2026-09-28T11:37:03.973136Z",
+            "source_collected_max": "2026-09-28T11:42:42.453475Z"
+          },
+          {
+            "city": "mock-tokyo",
+            "platform": "mock-social",
+            "candidates": 3,
+            "distinct_external_ids": 3,
+            "candidates_with_evidence": 3,
+            "source_collected_min": "2026-09-21T05:40:45.537499Z",
+            "source_collected_max": "2026-09-21T05:40:45.540413Z"
+          },
+          {
+            "city": "mock-tokyo",
+            "platform": "mock-places",
+            "candidates": 1,
+            "distinct_external_ids": 1,
+            "candidates_with_evidence": 1,
+            "source_collected_min": "2026-09-21T05:40:31.011194Z",
+            "source_collected_max": "2026-09-21T05:40:31.011194Z"
+          }
+        ],
+        "totals": {
+          "candidates": 304,
+          "distinct_candidate_ids": 304,
+          "candidates_with_evidence": 273,
+          "candidates_with_two_evidence_types": 270,
+          "candidates_with_two_evidence_platforms": 0,
+          "evidence_rows": 543,
+          "candidates_with_source_content": 304
+        },
+        "stable_id_source_sample": [
+          {
+            "candidate_id": "012a438f9eae4e391e4ffb1d",
+            "poi_id": "afbb6a93c541828620639693",
+            "city": "Hanoi",
+            "source_content_id": "0a51e6915f87d4dec78c1dcd",
+            "platform": "osm",
+            "external_id": "node/3575191010",
+            "source_reference": "https://www.openstreetmap.org/node/3575191010",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:53:50.455547Z",
+            "source_collected_at": "2026-09-29T17:53:50.436353Z"
+          },
+          {
+            "candidate_id": "01d4a278d0ec8759877ee99a",
+            "poi_id": "8d003a0b54343bcf503c097b",
+            "city": "Hanoi",
+            "source_content_id": "6f1013db0410da57a5f5ca44",
+            "platform": "osm",
+            "external_id": "way/1118112027",
+            "source_reference": "https://www.openstreetmap.org/way/1118112027",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-28T12:10:50.333010Z",
+            "source_collected_at": "2026-09-29T17:53:31.256322Z"
+          },
+          {
+            "candidate_id": "01ee4982710f60729f854a89",
+            "poi_id": "2ed2727b495fe8779574dc38",
+            "city": "Hanoi",
+            "source_content_id": "217da879986ef2ba27ccc6fc",
+            "platform": "osm",
+            "external_id": "node/12496022959",
+            "source_reference": "https://www.openstreetmap.org/node/12496022959",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:20:07.631778Z",
+            "source_collected_at": "2026-09-29T17:20:07.607111Z"
+          },
+          {
+            "candidate_id": "0248cfd7d2fac7e65b3473ad",
+            "poi_id": "3132fc2dc55446a21013fb64",
+            "city": "Hanoi",
+            "source_content_id": "ac2c729737dccf97590926c6",
+            "platform": "osm",
+            "external_id": "way/849263200",
+            "source_reference": "https://www.openstreetmap.org/way/849263200",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:57:20.639133Z",
+            "source_collected_at": "2026-09-29T17:57:20.609557Z"
+          },
+          {
+            "candidate_id": "02751ce435d6f9e129547a16",
+            "poi_id": "bb3b34020428a8aaeea41174",
+            "city": "Hanoi",
+            "source_content_id": "d194b8653f56d57870f1c4c5",
+            "platform": "osm",
+            "external_id": "way/37933050",
+            "source_reference": "https://www.openstreetmap.org/way/37933050",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-28T12:11:09.338923Z",
+            "source_collected_at": "2026-09-28T12:11:09.310667Z"
+          },
+          {
+            "candidate_id": "02ac1a1fb2d26c8f0965a87e",
+            "poi_id": "1d532c0429ccd47698dfb90f",
+            "city": "Hanoi",
+            "source_content_id": "af7542647dcc7f4eb58caf18",
+            "platform": "osm",
+            "external_id": "node/3587852170",
+            "source_reference": "https://www.openstreetmap.org/node/3587852170",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:16:59.589846Z",
+            "source_collected_at": "2026-09-29T17:16:59.575848Z"
+          },
+          {
+            "candidate_id": "0341098c4c24e9101a6100c8",
+            "poi_id": "662836fdc9444194cfb19583",
+            "city": "Hanoi",
+            "source_content_id": "f161b29601f32c90561c00d0",
+            "platform": "osm",
+            "external_id": "node/721836730",
+            "source_reference": "https://www.openstreetmap.org/node/721836730",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:13:47.936540Z",
+            "source_collected_at": "2026-09-29T17:52:47.595908Z"
+          },
+          {
+            "candidate_id": "06264a25b5f86ada36f5a769",
+            "poi_id": "80fd0dbeb9707cb6829e694a",
+            "city": "Hanoi",
+            "source_content_id": "6888ad4b0afd3a47036b885c",
+            "platform": "osm",
+            "external_id": "way/884063648",
+            "source_reference": "https://www.openstreetmap.org/way/884063648",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:53:58.807013Z",
+            "source_collected_at": "2026-09-29T17:53:58.786250Z"
+          },
+          {
+            "candidate_id": "078fb1c60b1d7d7e3d89e5fe",
+            "poi_id": "5c87a25bc16cdc764105a201",
+            "city": "Hanoi",
+            "source_content_id": "dc3867168d865145c1fbe8ff",
+            "platform": "osm",
+            "external_id": "node/976473269",
+            "source_reference": "https://www.openstreetmap.org/node/976473269",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:19:55.112441Z",
+            "source_collected_at": "2026-09-29T17:19:55.087042Z"
+          },
+          {
+            "candidate_id": "086719d067af0f493af2718f",
+            "poi_id": "26003262bd7b4950b6f2ce3e",
+            "city": "Hanoi",
+            "source_content_id": "62232366edf28ebd6c1ce52b",
+            "platform": "osm",
+            "external_id": "node/723671512",
+            "source_reference": "https://www.openstreetmap.org/node/723671512",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:13:47.937957Z",
+            "source_collected_at": "2026-09-29T17:52:47.602188Z"
+          },
+          {
+            "candidate_id": "08b5f98feff66ff70c9f37f8",
+            "poi_id": "bfefe13b41f0ec07cb270b8e",
+            "city": "Hanoi",
+            "source_content_id": "41003b94315c54691d7bff4a",
+            "platform": "osm",
+            "external_id": "way/697326488",
+            "source_reference": "https://www.openstreetmap.org/way/697326488",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:20:07.638165Z",
+            "source_collected_at": "2026-09-29T17:20:07.614694Z"
+          },
+          {
+            "candidate_id": "097e8fe66790974f2665c4a3",
+            "poi_id": "ace5c37dac44dfb690a6291f",
+            "city": "Hanoi",
+            "source_content_id": "625022f8b6ec8b4d7fa86388",
+            "platform": "osm",
+            "external_id": "way/700627459",
+            "source_reference": "https://www.openstreetmap.org/way/700627459",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:13:47.950298Z",
+            "source_collected_at": "2026-09-29T17:52:47.606091Z"
+          },
+          {
+            "candidate_id": "0aa9b5bf469579664fbcea33",
+            "poi_id": "ed34298cdccc1df94b59c961",
+            "city": "Hanoi",
+            "source_content_id": "e5600191bcc47cae2cead58b",
+            "platform": "osm",
+            "external_id": "node/4456354590",
+            "source_reference": "https://www.openstreetmap.org/node/4456354590",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:16:29.475224Z",
+            "source_collected_at": "2026-09-29T17:16:29.445045Z"
+          },
+          {
+            "candidate_id": "0b1f2fd781069979d750203f",
+            "poi_id": null,
+            "city": "Hanoi",
+            "source_content_id": "337f12febfb2545db86c2691",
+            "platform": "osm",
+            "external_id": "node/973961088",
+            "source_reference": "https://www.openstreetmap.org/node/973961088",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:13:47.941804Z",
+            "source_collected_at": "2026-09-29T17:52:47.598082Z"
+          },
+          {
+            "candidate_id": "0b3fcb46fee83e863be29c84",
+            "poi_id": "57ab73bfbd796ab5fa8b66f2",
+            "city": "Hanoi",
+            "source_content_id": "2d926fceb216cd246c3509f9",
+            "platform": "osm",
+            "external_id": "node/708488337",
+            "source_reference": "https://www.openstreetmap.org/node/708488337",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-28T11:23:54.489798Z",
+            "source_collected_at": "2026-09-28T11:23:54.477684Z"
+          },
+          {
+            "candidate_id": "0c217c51f9848cb50c11dcf3",
+            "poi_id": "a67576869176b69ebed81fce",
+            "city": "Hanoi",
+            "source_content_id": "5df1c8523d18d871de8e13f4",
+            "platform": "xiaohongshu-browser",
+            "external_id": "6a8fedb100000000200308ac",
+            "source_reference": "https://www.xiaohongshu.com/explore/6a8fedb100000000200308ac",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T04:23:44.127497Z",
+            "source_collected_at": "2026-09-28T11:38:49.638134Z"
+          },
+          {
+            "candidate_id": "0c4f1fe71f4f1329aded4fd9",
+            "poi_id": null,
+            "city": "Hanoi",
+            "source_content_id": "1d80a87fedfe1f7a53c1957b",
+            "platform": "osm",
+            "external_id": "node/7202554793",
+            "source_reference": "https://www.openstreetmap.org/node/7202554793",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:13:47.934526Z",
+            "source_collected_at": "2026-09-29T17:52:47.605310Z"
+          },
+          {
+            "candidate_id": "0da10e284471ab628bc4802d",
+            "poi_id": "009d37f6f5c79a9787e219c8",
+            "city": "Hanoi",
+            "source_content_id": "e0a6432d8385c1ab6347a96a",
+            "platform": "osm",
+            "external_id": "node/13342409262",
+            "source_reference": "https://www.openstreetmap.org/node/13342409262",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-28T11:23:57.116829Z",
+            "source_collected_at": "2026-09-28T11:23:57.100692Z"
+          },
+          {
+            "candidate_id": "0e99e1c8e572ec7eba56bd65",
+            "poi_id": "f2cfa04f85ae826e81c20899",
+            "city": "Hanoi",
+            "source_content_id": "a5e171cf014017c26cf73afa",
+            "platform": "osm",
+            "external_id": "way/1163015446",
+            "source_reference": "https://www.openstreetmap.org/way/1163015446",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-28T11:23:57.113525Z",
+            "source_collected_at": "2026-09-28T11:23:57.102744Z"
+          },
+          {
+            "candidate_id": "0ec668d0ca2f61bb44713f7e",
+            "poi_id": "8c7abf1d8f4aad286f7caa49",
+            "city": "Hanoi",
+            "source_content_id": "9e246aa313af0ab5a66ae853",
+            "platform": "osm",
+            "external_id": "way/1289842481",
+            "source_reference": "https://www.openstreetmap.org/way/1289842481",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-29T17:19:55.128152Z",
+            "source_collected_at": "2026-09-29T17:19:55.090545Z"
+          }
+        ],
+        "independent_label_tables": [],
+        "independent_gold_label_status": "no dedicated gold/label/eval table detected; existing review_status is not an independent gold label",
+        "can_supply_500_raw_candidates": false,
+        "can_supply_500_candidates_with_source_and_evidence": false,
+        "can_supply_500_candidates_with_two_evidence_types": false,
+        "can_supply_500_candidates_with_two_evidence_platforms": false
+      },
+      "benchmarks": [
+        {
+          "name": "candidate_storage_scan_and_pending_filter",
+          "status": "ok",
+          "cases": 1,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 20,
+          "query_rows_mean": 304.0,
+          "logical_rows_mean": 67.0,
+          "latency_ms": {
+            "min": 7.09575,
+            "p50": 8.504916999999999,
+            "p95": 11.620412150000002,
+            "mean": 8.9881959,
+            "max": 12.172916
+          },
+          "query_rows_per_second_mean": 33822.13776626743,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "all": "sha256:2e2e97b669fa2677adbff8f13e1bb9c1ed94590f25a239cd3e619fe01c4713b1"
+          },
+          "query_plan": [
+            "4|0|224|SCAN poi_candidates USING INDEX idx_candidates_city",
+            "22|0|0|USE TEMP B-TREE FOR LAST TERM OF ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "candidate_city_page",
+          "status": "ok",
+          "cases": 2,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 40,
+          "query_rows_mean": 152.0,
+          "logical_rows_mean": 152.0,
+          "latency_ms": {
+            "min": 0.065,
+            "p50": 2.2090415,
+            "p95": 6.2030003,
+            "mean": 2.7206114,
+            "max": 10.285
+          },
+          "query_rows_per_second_mean": 55869.79456161949,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "Hanoi": "sha256:c25f28b4bf71919b11de1e4e700c473ccb34fb9423b862c1b2f66e18e335b530",
+            "mock-tokyo": "sha256:a210810a4d14632922ab6ec88704e0a739aa5c77d0f347b870f916dde3a9a2aa"
+          },
+          "query_plan": [
+            "5|0|62|SEARCH poi_candidates USING INDEX idx_candidates_city (city=?)",
+            "25|0|0|USE TEMP B-TREE FOR ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "poi_city_page",
+          "status": "ok",
+          "cases": 2,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 40,
+          "query_rows_mean": 115.0,
+          "logical_rows_mean": 115.0,
+          "latency_ms": {
+            "min": 0.042625,
+            "p50": 1.678667,
+            "p95": 6.283173249999998,
+            "mean": 2.522286475,
+            "max": 7.028083
+          },
+          "query_rows_per_second_mean": 45593.552175709934,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "Hanoi": "sha256:46c18289f607ec324b746a2d46705e72522a7bd9cd6b71dd3cb7ca57159442a3",
+            "mock-tokyo": "sha256:bb4f595de692124ea9aebc189aabd9f68a628cd7e0aa876e349c449336459284"
+          },
+          "query_plan": [
+            "5|0|61|SEARCH p USING INDEX idx_pois_city (city=? AND map_visibility=?)",
+            "26|0|0|USE TEMP B-TREE FOR ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "candidate_evidence_source_lookup",
+          "status": "ok",
+          "cases": 12,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 240,
+          "query_rows_mean": 1.9166666666666667,
+          "logical_rows_mean": 1.9166666666666667,
+          "latency_ms": {
+            "min": 0.149708,
+            "p50": 0.244104,
+            "p95": 0.5452103999999993,
+            "mean": 0.285615275,
+            "max": 1.088542
+          },
+          "query_rows_per_second_mean": 6710.658828267034,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "012a438f9eae4e391e4ffb1d": "sha256:e03c4d74bd609b5fcf6f11ac40314a014613dc6076c18a5fb61f406f9a7eb705",
+            "01d4a278d0ec8759877ee99a": "sha256:b2c95e1a140ef078d5febc99c9ca2e4e8c170c73d6a103e452d9b410ea63c15c",
+            "01ee4982710f60729f854a89": "sha256:1fd636e11ac0f57c81b9be5f11fc094d2167a711cf64f82c7bcbb7605913c525",
+            "0248cfd7d2fac7e65b3473ad": "sha256:9f8ff2f8506f003c6364ec2c16f77e747b1c23404bc6276954ed5ced6fa5db32",
+            "02751ce435d6f9e129547a16": "sha256:e918b008ee55d4a88ddbee482b383f9d0b921404b52745e816658bd998119153",
+            "02ac1a1fb2d26c8f0965a87e": "sha256:8c1bfa9b67cbc3c0c36e5d6b408cd410cf477c6106a6973a1e8951183d678614",
+            "0341098c4c24e9101a6100c8": "sha256:add1e70deee9706e8a8ec9abdd207b6374464d2d422aaa2d4736b590622e66b2",
+            "06264a25b5f86ada36f5a769": "sha256:b34b6816f840d915204a830ca189e0ca8f8d743a5b0430f65aebd9ea51d43e3a",
+            "078fb1c60b1d7d7e3d89e5fe": "sha256:bd2b9ee7824458b005099e33d5cce1ac256a168dc29e2dbcca12bf968f084e6e",
+            "086719d067af0f493af2718f": "sha256:14c11104df9e5044aa415f7d9ea262f50b33b2c7aa0e5c87bc120ee11a2e143e",
+            "089f927047468260f777351c": "sha256:444fa3cceff41053f76dec70152723cdb272c6b77241a86d568ee9da70af1797",
+            "08b5f98feff66ff70c9f37f8": "sha256:ff2f9c55a5feacc73bc58f883b60a0ad34094277166ef5667858559d30151c54"
+          },
+          "query_plan": [
+            "8|0|46|SEARCH c USING INDEX sqlite_autoindex_poi_candidates_1 (id=?)",
+            "15|0|215|SCAN e USING INDEX sqlite_autoindex_location_evidence_1 LEFT-JOIN",
+            "23|0|46|SEARCH s USING INDEX sqlite_autoindex_source_contents_1 (id=?) LEFT-JOIN"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "evidence_rollup_by_city",
+          "status": "ok",
+          "cases": 1,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 20,
+          "query_rows_mean": 2.0,
+          "logical_rows_mean": 2.0,
+          "latency_ms": {
+            "min": 0.941667,
+            "p50": 2.044563,
+            "p95": 7.0569788500000215,
+            "mean": 3.8153522000000004,
+            "max": 35.802
+          },
+          "query_rows_per_second_mean": 524.1980019564118,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "all": "sha256:aca214dcaf112ac74ae94f0990009c576688e6bc4c78338b47e439b0dba79b9a"
+          },
+          "query_plan": [
+            "9|0|224|SCAN c USING INDEX idx_candidates_city",
+            "21|0|53|SEARCH e USING AUTOMATIC COVERING INDEX (poi_candidate_id=?) LEFT-JOIN",
+            "64|0|0|USE TEMP B-TREE FOR count(DISTINCT)"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "review_history_lookup",
+          "status": "ok",
+          "cases": 8,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 160,
+          "query_rows_mean": 1.0,
+          "logical_rows_mean": 1.0,
+          "latency_ms": {
+            "min": 0.011792,
+            "p50": 0.025312,
+            "p95": 0.09736009999999982,
+            "mean": 0.03517964375,
+            "max": 0.172042
+          },
+          "query_rows_per_second_mean": 28425.52946545969,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "POI:009d37f6f5c79a9787e219c8": "sha256:740e019265eacad5f63c6d06a1e7003921ed66c159f8eb6b56f2a749c4bcb159",
+            "POI:0357c4b4dcc2e2fc9fa547a9": "sha256:5360b31168611de6bdccd2a7478a2928cc066d8bdbe8932c3aa0c2f863f602b9",
+            "POI:0359c70c53f103fe80500fb8": "sha256:09e60f691c43e55a37247a5cb9f029f5fc0904dd3fbccf7df796a75a040a7ae9",
+            "POI:03dbfdd437dca24d5b47fe28": "sha256:ce970639b1e46362ce8689cf6c04fcff3e63d69e334e64a9827b68698472152f",
+            "POI:04b3561d00496d988dff0ddb": "sha256:a56ec1be1650dc12bec7785b31e8326dbf9d5cb83f6e0253d9b2838a5412be56",
+            "POI:04ce8caf1ab8f10c47cb29c7": "sha256:532868cf7ef1ca0c6a4bb63f3ab27c3f3ddb295d0fc4734b5525aac6523ff34c",
+            "POI:065bd7232ff6d7abeeb6902f": "sha256:f05d998d495fffb09bc29b324e9f2687be1b0e418977554c544e486eb5d50132",
+            "POI:072a45a71b4cde6ac6835488": "sha256:905222a32a7afb087335f4a817a0db7220378b22568b59b3180b00f4c24a6595"
+          },
+          "query_plan": [
+            "4|0|61|SEARCH review_decisions USING INDEX idx_review_target (target_type=? AND target_id=?)",
+            "31|0|0|USE TEMP B-TREE FOR LAST TERM OF ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        }
+      ]
+    },
+    {
+      "path": "/Users/mars/Downloads/LAND-DATA/.local/nyc-incremental-acceptance-v2.db",
+      "started_at": "2026-10-27T16:50:37.855273+00:00",
+      "ended_at": "2026-10-27T16:51:13.422478+00:00",
+      "file_fingerprint_before": {
+        "nyc-incremental-acceptance-v2.db": {
+          "bytes": 212193280,
+          "mtime_ns": 1792551488558942848,
+          "sha256": "86cebe5886ca0f81e2239417b65a5b8632b21741d35fc9655634668a21343b1c"
+        },
+        "nyc-incremental-acceptance-v2.db-wal": {
+          "bytes": 0,
+          "mtime_ns": 1793119127377617362,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "nyc-incremental-acceptance-v2.db-shm": {
+          "bytes": 32768,
+          "mtime_ns": 1793119588141763121,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        }
+      },
+      "file_fingerprint_after": {
+        "nyc-incremental-acceptance-v2.db": {
+          "bytes": 212193280,
+          "mtime_ns": 1792551488558942848,
+          "sha256": "86cebe5886ca0f81e2239417b65a5b8632b21741d35fc9655634668a21343b1c"
+        },
+        "nyc-incremental-acceptance-v2.db-wal": {
+          "bytes": 0,
+          "mtime_ns": 1793119127377617362,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "nyc-incremental-acceptance-v2.db-shm": {
+          "bytes": 32768,
+          "mtime_ns": 1793119588141763121,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        }
+      },
+      "database_unchanged": true,
+      "sqlite_snapshot": {
+        "data_version": 1,
+        "schema_version": 62,
+        "page_count": 51805,
+        "page_size": 4096,
+        "freelist_count": 2635,
+        "journal_mode": "delete"
+      },
+      "tables": [
+        "content_classifications",
+        "dashboard_action_log",
+        "dashboard_jobs",
+        "event_candidates",
+        "events",
+        "field_provenance",
+        "llm_extraction_cache",
+        "location_evidence",
+        "official_guidance_page_states",
+        "official_guidance_snapshots",
+        "poi_candidates",
+        "poi_mentions",
+        "pois",
+        "raw_source_records",
+        "recommendation_signals",
+        "review_decisions",
+        "source_collection_checkpoints",
+        "source_contents",
+        "source_discovery_candidates",
+        "source_discovery_checkpoints",
+        "source_discovery_runs",
+        "source_runs",
+        "xhs_knowledge_attempts",
+        "xhs_knowledge_candidates",
+        "xhs_knowledge_drafts",
+        "xhs_knowledge_review_log",
+        "xhs_processing_attempts",
+        "xhs_processing_state"
+      ],
+      "table_counts": {
+        "content_classifications": 0,
+        "dashboard_action_log": 1,
+        "dashboard_jobs": 1,
+        "event_candidates": 2659,
+        "events": 2624,
+        "field_provenance": 113899,
+        "llm_extraction_cache": 0,
+        "location_evidence": 25832,
+        "official_guidance_page_states": 0,
+        "official_guidance_snapshots": 0,
+        "poi_candidates": 12958,
+        "poi_mentions": 0,
+        "pois": 12776,
+        "raw_source_records": 17025,
+        "recommendation_signals": 0,
+        "review_decisions": 0,
+        "source_collection_checkpoints": 2,
+        "source_contents": 15617,
+        "source_discovery_candidates": 0,
+        "source_discovery_checkpoints": 0,
+        "source_discovery_runs": 0,
+        "source_runs": 640,
+        "xhs_knowledge_attempts": 0,
+        "xhs_knowledge_candidates": 0,
+        "xhs_knowledge_drafts": 0,
+        "xhs_knowledge_review_log": 0,
+        "xhs_processing_attempts": 0,
+        "xhs_processing_state": 0
+      },
+      "candidate_inventory": {
+        "available": true,
+        "by_city": [
+          {
+            "city": "New York",
+            "candidates": 12704,
+            "distinct_candidate_ids": 12704,
+            "distinct_source_content_ids": 12704,
+            "distinct_external_ids": 12704,
+            "candidates_with_evidence": 12704,
+            "candidates_with_two_evidence_types": 12620,
+            "candidates_with_two_evidence_platforms": 0,
+            "evidence_rows": 25324,
+            "candidates_with_source_content": 12704,
+            "candidates_without_review_status": 0,
+            "candidate_created_min": "2026-09-21T18:13:31.061367Z",
+            "candidate_created_max": "2026-10-18T14:23:11.294311Z",
+            "source_collected_min": "2026-09-22T20:31:10.144083Z",
+            "source_collected_max": "2026-10-18T15:17:04.402639Z",
+            "evidence_created_min": "2026-09-21T18:13:31.061367Z",
+            "evidence_created_max": "2026-10-18T14:23:11.294311Z"
+          },
+          {
+            "city": "Hanoi",
+            "candidates": 254,
+            "distinct_candidate_ids": 254,
+            "distinct_source_content_ids": 254,
+            "distinct_external_ids": 254,
+            "candidates_with_evidence": 254,
+            "candidates_with_two_evidence_types": 254,
+            "candidates_with_two_evidence_platforms": 0,
+            "evidence_rows": 508,
+            "candidates_with_source_content": 254,
+            "candidates_without_review_status": 0,
+            "candidate_created_min": "2026-09-30T00:44:17.515282Z",
+            "candidate_created_max": "2026-10-16T00:43:31.570334Z",
+            "source_collected_min": "2026-10-10T20:56:02.479311Z",
+            "source_collected_max": "2026-10-21T02:58:01.956908Z",
+            "evidence_created_min": "2026-09-30T00:44:17.515282Z",
+            "evidence_created_max": "2026-10-16T00:43:31.570334Z"
+          }
+        ],
+        "by_city_and_platform": [
+          {
+            "city": "New York",
+            "platform": "nyc-open-data-restaurants",
+            "candidates": 12693,
+            "distinct_external_ids": 12693,
+            "candidates_with_evidence": 12693,
+            "source_collected_min": "2026-09-22T20:31:10.144083Z",
+            "source_collected_max": "2026-10-18T14:23:10.438146Z"
+          },
+          {
+            "city": "Hanoi",
+            "platform": "osm",
+            "candidates": 254,
+            "distinct_external_ids": 254,
+            "candidates_with_evidence": 254,
+            "source_collected_min": "2026-10-10T20:56:02.479311Z",
+            "source_collected_max": "2026-10-21T02:58:01.956908Z"
+          },
+          {
+            "city": "New York",
+            "platform": "osm",
+            "candidates": 11,
+            "distinct_external_ids": 11,
+            "candidates_with_evidence": 11,
+            "source_collected_min": "2026-09-28T08:14:16.496880Z",
+            "source_collected_max": "2026-10-18T15:17:04.402639Z"
+          }
+        ],
+        "totals": {
+          "candidates": 12958,
+          "distinct_candidate_ids": 12958,
+          "candidates_with_evidence": 12958,
+          "candidates_with_two_evidence_types": 12874,
+          "candidates_with_two_evidence_platforms": 0,
+          "evidence_rows": 25832,
+          "candidates_with_source_content": 12958
+        },
+        "stable_id_source_sample": [
+          {
+            "candidate_id": "012a438f9eae4e391e4ffb1d",
+            "poi_id": "afbb6a93c541828620639693",
+            "city": "Hanoi",
+            "source_content_id": "0a51e6915f87d4dec78c1dcd",
+            "platform": "osm",
+            "external_id": "node/3575191010",
+            "source_reference": "https://www.openstreetmap.org/node/3575191010",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:54.601485Z",
+            "source_collected_at": "2026-10-21T02:53:17.561195Z"
+          },
+          {
+            "candidate_id": "016ff885f8290cd29b1294f5",
+            "poi_id": "12086ed33b87e338f6075f3c",
+            "city": "Hanoi",
+            "source_content_id": "416f2cd978e064efb67aa442",
+            "platform": "osm",
+            "external_id": "node/4566479490",
+            "source_reference": "https://www.openstreetmap.org/node/4566479490",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-10-10T20:56:02.619771Z",
+            "source_collected_at": "2026-10-10T20:56:02.479311Z"
+          },
+          {
+            "candidate_id": "01d4a278d0ec8759877ee99a",
+            "poi_id": "8d003a0b54343bcf503c097b",
+            "city": "Hanoi",
+            "source_content_id": "6f1013db0410da57a5f5ca44",
+            "platform": "osm",
+            "external_id": "way/1118112027",
+            "source_reference": "https://www.openstreetmap.org/way/1118112027",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:41.055492Z",
+            "source_collected_at": "2026-10-21T02:52:29.410517Z"
+          },
+          {
+            "candidate_id": "01ee4982710f60729f854a89",
+            "poi_id": "2ed2727b495fe8779574dc38",
+            "city": "Hanoi",
+            "source_content_id": "217da879986ef2ba27ccc6fc",
+            "platform": "osm",
+            "external_id": "node/12496022959",
+            "source_reference": "https://www.openstreetmap.org/node/12496022959",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:25.494882Z",
+            "source_collected_at": "2026-10-21T02:51:51.366696Z"
+          },
+          {
+            "candidate_id": "0248cfd7d2fac7e65b3473ad",
+            "poi_id": "3132fc2dc55446a21013fb64",
+            "city": "Hanoi",
+            "source_content_id": "ac2c729737dccf97590926c6",
+            "platform": "osm",
+            "external_id": "way/849263200",
+            "source_reference": "https://www.openstreetmap.org/way/849263200",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:48:07.498601Z",
+            "source_collected_at": "2026-10-21T02:57:29.899739Z"
+          },
+          {
+            "candidate_id": "02751ce435d6f9e129547a16",
+            "poi_id": "bb3b34020428a8aaeea41174",
+            "city": "Hanoi",
+            "source_content_id": "d194b8653f56d57870f1c4c5",
+            "platform": "osm",
+            "external_id": "way/37933050",
+            "source_reference": "https://www.openstreetmap.org/way/37933050",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:48:22.538922Z",
+            "source_collected_at": "2026-10-21T02:58:01.950809Z"
+          },
+          {
+            "candidate_id": "02ac1a1fb2d26c8f0965a87e",
+            "poi_id": "1d532c0429ccd47698dfb90f",
+            "city": "Hanoi",
+            "source_content_id": "af7542647dcc7f4eb58caf18",
+            "platform": "osm",
+            "external_id": "node/3587852170",
+            "source_reference": "https://www.openstreetmap.org/node/3587852170",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:45:10.152516Z",
+            "source_collected_at": "2026-10-21T02:48:39.513658Z"
+          },
+          {
+            "candidate_id": "0341098c4c24e9101a6100c8",
+            "poi_id": "662836fdc9444194cfb19583",
+            "city": "Hanoi",
+            "source_content_id": "f161b29601f32c90561c00d0",
+            "platform": "osm",
+            "external_id": "node/721836730",
+            "source_reference": "https://www.openstreetmap.org/node/721836730",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:17.517029Z",
+            "source_collected_at": "2026-10-21T02:44:33.491910Z"
+          },
+          {
+            "candidate_id": "06264a25b5f86ada36f5a769",
+            "poi_id": "80fd0dbeb9707cb6829e694a",
+            "city": "Hanoi",
+            "source_content_id": "6888ad4b0afd3a47036b885c",
+            "platform": "osm",
+            "external_id": "way/884063648",
+            "source_reference": "https://www.openstreetmap.org/way/884063648",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:47:06.926504Z",
+            "source_collected_at": "2026-10-21T02:34:07.474729Z"
+          },
+          {
+            "candidate_id": "078fb1c60b1d7d7e3d89e5fe",
+            "poi_id": "5c87a25bc16cdc764105a201",
+            "city": "Hanoi",
+            "source_content_id": "dc3867168d865145c1fbe8ff",
+            "platform": "osm",
+            "external_id": "node/976473269",
+            "source_reference": "https://www.openstreetmap.org/node/976473269",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:07.866998Z",
+            "source_collected_at": "2026-10-21T02:51:13.473002Z"
+          },
+          {
+            "candidate_id": "086719d067af0f493af2718f",
+            "poi_id": "26003262bd7b4950b6f2ce3e",
+            "city": "Hanoi",
+            "source_content_id": "62232366edf28ebd6c1ce52b",
+            "platform": "osm",
+            "external_id": "node/723671512",
+            "source_reference": "https://www.openstreetmap.org/node/723671512",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:17.520402Z",
+            "source_collected_at": "2026-10-21T02:44:33.501079Z"
+          },
+          {
+            "candidate_id": "08b5f98feff66ff70c9f37f8",
+            "poi_id": "bfefe13b41f0ec07cb270b8e",
+            "city": "Hanoi",
+            "source_content_id": "41003b94315c54691d7bff4a",
+            "platform": "osm",
+            "external_id": "way/697326488",
+            "source_reference": "https://www.openstreetmap.org/way/697326488",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:25.507377Z",
+            "source_collected_at": "2026-10-21T02:51:51.376944Z"
+          },
+          {
+            "candidate_id": "097e8fe66790974f2665c4a3",
+            "poi_id": "ace5c37dac44dfb690a6291f",
+            "city": "Hanoi",
+            "source_content_id": "625022f8b6ec8b4d7fa86388",
+            "platform": "osm",
+            "external_id": "way/700627459",
+            "source_reference": "https://www.openstreetmap.org/way/700627459",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:17.600695Z",
+            "source_collected_at": "2026-10-21T02:44:33.509616Z"
+          },
+          {
+            "candidate_id": "0aa9b5bf469579664fbcea33",
+            "poi_id": "ed34298cdccc1df94b59c961",
+            "city": "Hanoi",
+            "source_content_id": "e5600191bcc47cae2cead58b",
+            "platform": "osm",
+            "external_id": "node/4456354590",
+            "source_reference": "https://www.openstreetmap.org/node/4456354590",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:37.861781Z",
+            "source_collected_at": "2026-10-21T02:45:08.424038Z"
+          },
+          {
+            "candidate_id": "0b1f2fd781069979d750203f",
+            "poi_id": null,
+            "city": "Hanoi",
+            "source_content_id": "337f12febfb2545db86c2691",
+            "platform": "osm",
+            "external_id": "node/973961088",
+            "source_reference": "https://www.openstreetmap.org/node/973961088",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:17.525791Z",
+            "source_collected_at": "2026-10-21T02:44:33.494611Z"
+          },
+          {
+            "candidate_id": "0c4f1fe71f4f1329aded4fd9",
+            "poi_id": null,
+            "city": "Hanoi",
+            "source_content_id": "1d80a87fedfe1f7a53c1957b",
+            "platform": "osm",
+            "external_id": "node/7202554793",
+            "source_reference": "https://www.openstreetmap.org/node/7202554793",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:44:17.515282Z",
+            "source_collected_at": "2026-10-21T02:44:33.507774Z"
+          },
+          {
+            "candidate_id": "0ec668d0ca2f61bb44713f7e",
+            "poi_id": "8c7abf1d8f4aad286f7caa49",
+            "city": "Hanoi",
+            "source_content_id": "9e246aa313af0ab5a66ae853",
+            "platform": "osm",
+            "external_id": "way/1289842481",
+            "source_reference": "https://www.openstreetmap.org/way/1289842481",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:46:07.890072Z",
+            "source_collected_at": "2026-10-21T02:51:13.475872Z"
+          },
+          {
+            "candidate_id": "0f30d014d33dfacfb55c8586",
+            "poi_id": "5e3e5f2a484b96f06fa0af78",
+            "city": "Hanoi",
+            "source_content_id": "fbcc42c53c14e5a26f45f856",
+            "platform": "osm",
+            "external_id": "node/993037588",
+            "source_reference": "https://www.openstreetmap.org/node/993037588",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:47:50.816304Z",
+            "source_collected_at": "2026-10-21T02:56:53.107615Z"
+          },
+          {
+            "candidate_id": "0f8335c7decb2d4fc629cbaa",
+            "poi_id": null,
+            "city": "Hanoi",
+            "source_content_id": "33f36d0963853fee7c912a7f",
+            "platform": "osm",
+            "external_id": "node/4934970823",
+            "source_reference": "https://www.openstreetmap.org/node/4934970823",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:45:10.156156Z",
+            "source_collected_at": "2026-10-21T02:48:39.494021Z"
+          },
+          {
+            "candidate_id": "100c88cb144b769d828f1a1d",
+            "poi_id": "f4353415c8151151020dbe43",
+            "city": "Hanoi",
+            "source_content_id": "9737bc50a17d2994b77a9fe5",
+            "platform": "osm",
+            "external_id": "way/699905188",
+            "source_reference": "https://www.openstreetmap.org/way/699905188",
+            "source_status": "ACTIVE",
+            "candidate_created_at": "2026-09-30T00:45:24.554835Z",
+            "source_collected_at": "2026-10-21T02:49:16.594582Z"
+          }
+        ],
+        "independent_label_tables": [],
+        "independent_gold_label_status": "no dedicated gold/label/eval table detected; existing review_status is not an independent gold label",
+        "can_supply_500_raw_candidates": true,
+        "can_supply_500_candidates_with_source_and_evidence": true,
+        "can_supply_500_candidates_with_two_evidence_types": true,
+        "can_supply_500_candidates_with_two_evidence_platforms": false
+      },
+      "benchmarks": [
+        {
+          "name": "candidate_storage_scan_and_pending_filter",
+          "status": "ok",
+          "cases": 1,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 20,
+          "query_rows_mean": 12958.0,
+          "logical_rows_mean": 152.0,
+          "latency_ms": {
+            "min": 263.403583,
+            "p50": 323.6647915,
+            "p95": 662.4034458500001,
+            "mean": 400.42983955,
+            "max": 802.950167
+          },
+          "query_rows_per_second_mean": 32360.225737827386,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "all": "sha256:43677fefb4df2bc85edc5a57e8cac1f68b782310f2588e918a41a9fc02fdfb3b"
+          },
+          "query_plan": [
+            "4|0|224|SCAN poi_candidates USING INDEX idx_candidates_city",
+            "22|0|0|USE TEMP B-TREE FOR LAST TERM OF ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "candidate_city_page",
+          "status": "ok",
+          "cases": 2,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 40,
+          "query_rows_mean": 627.0,
+          "logical_rows_mean": 627.0,
+          "latency_ms": {
+            "min": 3.236917,
+            "p50": 35.671958000000004,
+            "p95": 104.83053329999983,
+            "mean": 44.701282199999994,
+            "max": 188.723833
+          },
+          "query_rows_per_second_mean": 14026.443295176889,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "New York": "sha256:b24eb5875701d4c35cb856d4854e70fd818634537d9a3e5f241ca6fe20bc8e1f",
+            "Hanoi": "sha256:2fdf94528ffed7bff8204a93822425d121f633c80b3e7527b71041919ab9f031"
+          },
+          "query_plan": [
+            "5|0|62|SEARCH poi_candidates USING INDEX idx_candidates_city (city=?)",
+            "25|0|0|USE TEMP B-TREE FOR ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "poi_city_page",
+          "status": "ok",
+          "cases": 2,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 40,
+          "query_rows_mean": 592.5,
+          "logical_rows_mean": 592.5,
+          "latency_ms": {
+            "min": 1.875375,
+            "p50": 12.9304585,
+            "p95": 30.516693749999995,
+            "mean": 13.936593775,
+            "max": 31.410541
+          },
+          "query_rows_per_second_mean": 42513.97504767982,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "New York": "sha256:1f14f81c0e8289eb13119649ca7b94fecff9639e6c0d7d316f192f166110bd09",
+            "Hanoi": "sha256:a995c2217c5c6c18af0951fb512e0f591a0dc767c7ae6350925d68e246106a3a"
+          },
+          "query_plan": [
+            "5|0|61|SEARCH p USING INDEX idx_pois_city (city=? AND map_visibility=?)",
+            "26|0|0|USE TEMP B-TREE FOR ORDER BY"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "candidate_evidence_source_lookup",
+          "status": "ok",
+          "cases": 12,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 240,
+          "query_rows_mean": 2.0,
+          "logical_rows_mean": 2.0,
+          "latency_ms": {
+            "min": 45.438792,
+            "p50": 54.933583,
+            "p95": 89.0036125,
+            "mean": 59.499250687499995,
+            "max": 114.001916
+          },
+          "query_rows_per_second_mean": 33.61386869398296,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "000349a2c0f5f6c4f19386c5": "sha256:3c145d9e289ac243860dc8b466ab929238aa15457f520b243a874bcc0131036d",
+            "00054d3c6eba91cb8ab25ad4": "sha256:2e931b7abdaa534492211fc29599d32329cff6e8381a3e30ea6825fe95ff69e3",
+            "000b68ab97f0a66be74b24d5": "sha256:9945f43ef654f134d1571ada54c8076c8c3ff27b0a2d1e2bc6e9b04d46783521",
+            "0017587f28e37c1b2651d87b": "sha256:ee10f2b8b3c3656b407a0be2e0a4f4871b422ce824f435471c68ddb5008368e0",
+            "001a3758e37fcedc5768bff9": "sha256:c0c3a07cf98096f2446c6d8107529aeb13310dc7a7937254c2512a01c71396d0",
+            "001a6d5a106d190663ae4399": "sha256:93c94a80140017f4cb1285a753f894723d2e76fba19839d2d4b6e25bcae34a9b",
+            "001d2031398adb05cc33e509": "sha256:4e7f426b4af0e443cb8fdaa4a69f00f3e6bf5948346e00ace96b94108164e202",
+            "001ee22065aea396190256f2": "sha256:c5046f54fc8f8cebbc75aa1aa21a3ea7916a53682731015a7bf9790f7cff2281",
+            "002ab490ce4339ce4b502e7f": "sha256:f423ebf654ed42a29391960f05d5dd97086ceee230890818f62fbefec56163c7",
+            "002e2bb7b0a01964c507c94d": "sha256:2c256d5495a08b68d4b2300911d36c87481e21909010a63546138ed94919914a",
+            "002edc9e4262c1627a8ccce9": "sha256:20ab95f2e0a0942bb395a818f380de80d99fc8cd929a8b5f93c5624b2b3322cd",
+            "002ee87a2a2431a4a4c73e7c": "sha256:5cd1f3f2936687f86b7d912db2ed2708add2e1502d56cb09fad3c824f22cc556"
+          },
+          "query_plan": [
+            "8|0|46|SEARCH c USING INDEX sqlite_autoindex_poi_candidates_1 (id=?)",
+            "15|0|215|SCAN e USING INDEX sqlite_autoindex_location_evidence_1 LEFT-JOIN",
+            "23|0|46|SEARCH s USING INDEX sqlite_autoindex_source_contents_1 (id=?) LEFT-JOIN"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        },
+        {
+          "name": "evidence_rollup_by_city",
+          "status": "ok",
+          "cases": 1,
+          "warmups_per_case": 3,
+          "iterations_per_case": 20,
+          "queries": 20,
+          "query_rows_mean": 2.0,
+          "logical_rows_mean": 2.0,
+          "latency_ms": {
+            "min": 62.920125,
+            "p50": 72.5841875,
+            "p95": 113.14911940000002,
+            "mean": 79.77696449999999,
+            "max": 143.906042
+          },
+          "query_rows_per_second_mean": 25.069893452764806,
+          "repeat_digest_mismatches": 0,
+          "case_digests": {
+            "all": "sha256:b29cce832f364d49d2fa2c45c2942b2fc3f2bc08aa00371876b33d55d19d2fb4"
+          },
+          "query_plan": [
+            "9|0|224|SCAN c USING INDEX idx_candidates_city",
+            "21|0|53|SEARCH e USING AUTOMATIC COVERING INDEX (poi_candidate_id=?) LEFT-JOIN",
+            "64|0|0|USE TEMP B-TREE FOR count(DISTINCT)"
+          ],
+          "errors": [],
+          "scope_note": "SQLite read/fetch plus selected JSON decoding; excludes network, LLM, dynamic tool choice, human review, and Agent end-to-end latency."
+        }
+      ]
+    }
+  ]
+}

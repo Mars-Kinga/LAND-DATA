@@ -1,0 +1,34 @@
+{
+  "available_signal_counts": {
+    "address_coordinate_conflict_current": 20,
+    "address_coordinate_conflict_historical": 105,
+    "moved_or_closed_screening_only": 5,
+    "same_name_branch_screening_only": 3432,
+    "stale_or_conflicting_source_screening_only": 885
+  },
+  "gold_labels": 0,
+  "input_hashes": {
+    "current_dot": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c",
+    "daily_packet": "90a35f98b3d4e21762906ae2da7c4d50c2018bceae374df247747a7bc396b121",
+    "db": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11",
+    "historical_dot": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d",
+    "temporal": "a00d856205f79afae701815cbd391cf2a90adb707cffbae6c9b69139bf2ae8ba"
+  },
+  "quota_note": "Four hard groups require 50 eligible Gold each; risk signals alone do not qualify cases.",
+  "scope": "Unlabelled risk shortlist, not hard-case Gold or locked evaluation split",
+  "selected_signal_counts": {
+    "address_coordinate_conflict_current": 20,
+    "address_coordinate_conflict_historical": 30,
+    "moved_or_closed_screening_only": 5,
+    "same_name_branch_screening_only": 50,
+    "stale_or_conflicting_source_screening_only": 50
+  },
+  "selected_stratum_counts": {
+    "address_coordinate_conflict": 50,
+    "moved_or_closed": 5,
+    "same_name_branch": 50,
+    "stale_or_conflicting_source": 50
+  },
+  "selected_total": 155,
+  "shortlist_sha256": "c2e8c3389b10fbfc63a7d58a369ea19bdffc78370e3ef7533623df424e33fcda"
+}

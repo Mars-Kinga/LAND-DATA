@@ -153,6 +153,41 @@ def build_parser() -> argparse.ArgumentParser:
     classifier_evaluate.add_argument(
         "--expected-fingerprint",
         help="optional sha256 fingerprint; fail if the frozen file changed")
+    location_verify = commands.add_parser(
+        "location-verify", help="run the isolated, read-only location verification harness")
+    location_verify.add_argument("--case", type=Path, required=True)
+    location_verify.add_argument("--tool-manifest", type=Path, required=True)
+    location_verify.add_argument("--journal", type=Path, required=True)
+    location_verify.add_argument("--policy", choices=("fixed", "qwen"), default="fixed")
+    location_verify.add_argument("--output", type=Path)
+    location_verify.add_argument("--handoff-output", type=Path)
+    location_queue = commands.add_parser(
+        "location-verify-queue", help="list human handoffs in a verification journal")
+    location_queue.add_argument("--journal", type=Path, required=True)
+    location_queue.add_argument("--with-business-candidates", action="store_true",
+                                help="read-only link to current POICandidate review targets")
+    location_prepare = commands.add_parser(
+        "location-verify-prepare", help="prepare one frozen LAND-DATA dossier for read-only replay")
+    location_prepare.add_argument("--dossier", type=Path, required=True)
+    location_prepare.add_argument("--expected-dossier-sha256", required=True)
+    location_prepare.add_argument("--case-id", required=True)
+    location_prepare.add_argument("--output-dir", type=Path, required=True)
+    location_prepare.add_argument("--as-of", help="required for daily dossiers without an as-of timestamp")
+    location_prepare_db = commands.add_parser(
+        "location-verify-prepare-db",
+        help="freeze one existing business candidate into a read-only verification case")
+    location_prepare_db.add_argument("--candidate-id", required=True)
+    location_prepare_db.add_argument("--output-dir", type=Path, required=True)
+    location_prepare_db.add_argument("--as-of", required=True,
+                                     help="timezone-aware snapshot cutoff, for example 2026-10-28T00:00:00Z")
+    location_hold = commands.add_parser(
+        "location-verify-review-hold",
+        help="preview or apply a business review hold for a verified conflict")
+    location_hold.add_argument("--case", type=Path, required=True)
+    location_hold.add_argument("--tool-manifest", type=Path, required=True)
+    location_hold.add_argument("--journal", type=Path, required=True)
+    location_hold.add_argument("--apply", action="store_true",
+                               help="write NEEDS_REVIEW and append-only decisions; default is preview")
     xhs = commands.add_parser("xhs", help="collect visible Xiaohongshu posts through your logged-in Chrome")
     xhs_commands = xhs.add_subparsers(dest="xhs_command", required=True)
     for name in ("login", "status"):
@@ -406,6 +441,59 @@ def main(argv=None) -> int:
         if (args.command == "classifier" and
                 args.classifier_command == "evaluate"):
             result = evaluate_jsonl(args.dataset, args.expected_fingerprint)
+            print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+            return 0
+        if args.command == "location-verify":
+            from .location_verification_replay import run as run_location_verification
+
+            protected = (config.root / ".local" / "baselines").resolve()
+            if args.journal.resolve().is_relative_to(protected):
+                raise ValueError("journal must be outside frozen baselines")
+            if args.journal.resolve() in {args.case.resolve(), args.tool_manifest.resolve()}:
+                raise ValueError("journal cannot overwrite replay input")
+            result = run_location_verification(
+                args.case, args.tool_manifest, args.journal, args.policy, config.root,
+                args.handoff_output)
+            rendered = json.dumps(result, ensure_ascii=False, sort_keys=True)
+            if args.output:
+                if args.output.exists() or args.output.is_symlink():
+                    raise FileExistsError("refusing to overwrite run summary")
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(rendered + "\n", encoding="utf-8")
+                args.output.chmod(0o600)
+            print(rendered)
+            return 0
+        if args.command == "location-verify-queue":
+            from .location_verification import VerificationJournal
+
+            if not args.journal.is_file() or args.journal.is_symlink():
+                raise ValueError("verification journal does not exist or is a symlink")
+            queue = VerificationJournal(args.journal).handoff_queue()
+            if args.with_business_candidates:
+                from .location_verification_db import attach_business_review_targets
+                queue = attach_business_review_targets(Path(db_path), queue)
+            print(json.dumps({"count": len(queue), "cases": queue},
+                             ensure_ascii=False, sort_keys=True))
+            return 0
+        if args.command == "location-verify-prepare":
+            from .location_verification_prepare import prepare
+
+            result = prepare(args.dossier, args.expected_dossier_sha256,
+                             args.case_id, args.output_dir, args.as_of)
+            print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+            return 0
+        if args.command == "location-verify-prepare-db":
+            from .location_verification_db import prepare_db
+
+            result = prepare_db(Path(db_path), args.candidate_id,
+                                args.output_dir, args.as_of)
+            print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+            return 0
+        if args.command == "location-verify-review-hold":
+            from .location_verification_review import hold_conflict
+
+            result = hold_conflict(Path(db_path), args.case, args.tool_manifest,
+                                   args.journal, apply=args.apply)
             print(json.dumps(result, ensure_ascii=False, sort_keys=True))
             return 0
         with SQLiteStorage(db_path) as storage:

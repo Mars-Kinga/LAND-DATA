@@ -1,8 +1,11 @@
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
+from unittest.mock import patch
 
+import land_data.nyc_parks_events as nyc_parks_events_module
 from land_data.config import load_config
 from land_data.models import (Event, EventCandidate, FieldProvenance, POI,
                               RawSourceRecord, RecommendationSignal, SourceContent)
@@ -14,6 +17,15 @@ from land_data.sqlite_storage import SQLiteStorage
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+# The adapter marks events relative to its collection clock.  Keep the clock
+# before the fixture event so lifecycle assertions stay stable over time.
+REFERENCE_NOW = datetime(2026, 9, 30, tzinfo=timezone.utc)
+DEFAULT_EVENT_START = (REFERENCE_NOW + timedelta(days=1, hours=10)).strftime(
+    "%Y-%m-%dT%H:%M:%S.000")
+DEFAULT_EVENT_END = (REFERENCE_NOW + timedelta(days=1, hours=11)).strftime(
+    "%Y-%m-%dT%H:%M:%S.000")
 
 
 class Response:
@@ -31,8 +43,8 @@ class Response:
         return self.body
 
 
-def event_row(guid, title=None, *, start="2026-10-01T10:00:00.000",
-              end="2026-10-01T11:00:00.000", coords="40.7000,-74.0000"):
+def event_row(guid, title=None, *, start=DEFAULT_EVENT_START,
+              end=DEFAULT_EVENT_END, coords="40.7000,-74.0000"):
     return {
         "guid": str(guid), "title": title or "Park event {}".format(guid),
         "instructor": "Parks Team", "link": "https://www.nycgovparks.org/events/{}".format(guid),
@@ -51,8 +63,19 @@ class NYCParksEventsTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.storage = SQLiteStorage(str(Path(self.temp.name) / "events.db"))
         self.addCleanup(self.storage.close)
+        self.clock_tick = 0
+        self.clock_patch = patch.object(
+            nyc_parks_events_module, "utc_now", side_effect=self._utc_now)
+        self.clock_patch.start()
+        self.addCleanup(self.clock_patch.stop)
         self.config = load_config(str(ROOT))
         self.pipeline = Pipeline(self.storage, self.config)
+
+    def _utc_now(self):
+        """Return deterministic, distinct timestamps for each snapshot call."""
+        self.clock_tick += 1
+        value = REFERENCE_NOW + timedelta(seconds=self.clock_tick)
+        return value.isoformat().replace("+00:00", "Z")
 
     def runner(self, batches, *, limit=2, max_pages=20):
         calls = []
@@ -112,7 +135,7 @@ class NYCParksEventsTests(unittest.TestCase):
         self.assertIn("EVENT_SOURCE_UPDATED", candidate.review_reasons)
 
     def test_invalid_time_and_coordinate_remain_reviewable(self):
-        invalid = event_row("bad", start="bad", end="2026-10-01T11:00:00.000",
+        invalid = event_row("bad", start="bad", end=DEFAULT_EVENT_END,
                             coords="95.0,-74.0")
         runner, _ = self.runner([[invalid], []], limit=2)
         result = runner.run()["sources"][0]

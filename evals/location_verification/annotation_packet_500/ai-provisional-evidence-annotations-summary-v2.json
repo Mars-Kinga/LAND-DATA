@@ -1,0 +1,25 @@
+{
+  "annotation_count": 655,
+  "daily_coordinate_status_counts": {
+    "CROSS_SOURCE_AGREEMENT": 23,
+    "UNKNOWN": 477
+  },
+  "daily_identity_status_counts": {
+    "PLAUSIBLE_MATCH_NOT_CONFIRMED": 24,
+    "UNKNOWN": 476
+  },
+  "gold_labels": 0,
+  "input_hashes": {
+    "daily_dossiers": "3d20fc51b262fbcf789f9a48f0dfb0debe9a29f98dc55725d10c24a32b8bd4bc",
+    "v1_annotations": "2f0af953a75c89224dbca78f592fae5acc907e34c6f6aa3696bb7c37cdb3619b"
+  },
+  "locked_split_assigned": false,
+  "next_action_counts": {
+    "COLLECT_CURRENT_INDEPENDENT_EVIDENCE": 567,
+    "HUMAN_COORDINATE_REVIEW": 18,
+    "HUMAN_DISAMBIGUATION": 2,
+    "REPAIR_INPUT_AND_COLLECT_EVIDENCE": 68
+  },
+  "output_sha256": "e21612d0bdfe78e29ba6875e2947c426cbb7b1e72649158f26fe6ec98e57a310",
+  "scope": "Single-AI provisional source relationship labels; not location Gold"
+}

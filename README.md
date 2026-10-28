@@ -50,6 +50,23 @@ flowchart LR
 
 需要采集本人已登录的小红书可见页面时，先运行 `./land-data xhs login`，再运行 `./land-data --db .local/land-data.db xhs collect`；采集阶段和默认规则处理都不调用 LLM。完整命令、登录边界、城市配置、审核与发布步骤见[操作说明](./操作说明.md)；终端工具细节见[小红书终端工具说明](./docs/xiaohongshu-terminal-tool.md)，Dashboard 安全边界见[Dashboard 说明](./docs/review-dashboard.md)。
 
+## Location Verification Agent Harness（开发期）
+
+地点核验被拆成 Case、逐字段 Claim、带来源与时间的 Evidence，以及每一步 Action。决策器根据证据缺口提议下一项工具或停止；Harness 负责只读工具白名单、参数、来源组、调用预算、SQLite checkpoint 与人工交接；独立的 Goal Gate 检查身份、时效、证据独立性和冲突，证据不足或模型失败时交人工。主命令支持固定顺序与千问策略，用相同冻结 Case／工具结果做配对回放。完整设计及 s01–s17 进度见[实施计划](./docs/location-verification-agent-harness-plan.md)，运行细节见[开发期报告](./evals/location_verification/harness_pilot/README.md)。
+
+```sh
+# 无需模型密钥：用仓库内合成 Case 做固定顺序、只读回放
+./land-data location-verify \
+  --case evals/location_verification/harness_pilot/synthetic-case.json \
+  --tool-manifest evals/location_verification/harness_pilot/synthetic-tools.json \
+  --journal .local/location-verification-demo.db --policy fixed
+./land-data location-verify-queue --journal .local/location-verification-demo.db
+```
+
+真实业务候选可用 `location-verify-prepare-db` 从业务 SQLite **只读**冻结候选、来源元数据和关联 POI 上下文，再交给 `location-verify`；旧 `AUTO_APPROVED` 和 POI 关联不算独立身份真值。明确证据冲突可用 `location-verify-review-hold` 预览；仅显式 `--apply` 才把仍自动通过的候选及关联 POI 置为待审、关闭地图可见性并追加审核历史。此桥接只在临时数据库验证，尚未对真实业务库执行，也未成为默认发布前拦截。
+
+目前的量化结果是**工程验证**：本次公开提交快照的完整离线测试 313/313 通过；1,004 条真实记录的固定顺序、只读坐标一致性试验中，20 条跨来源差异被转人工，984 条在 10 米阈值内，模型调用为 0；另有 100 条真实业务候选完成准备与固定顺序回放，均因缺少独立身份依据交人工。合成单案的千问策略已成功选取两项模拟工具，但真实业务候选的千问尝试在首次决策时发生客户端错误并安全交人工。以上均**不是地点核验准确率或前后提升**；500 条独立人工 Gold、同条件动态策略对照及完整 s01–s17 实现仍未完成。评测口径见[评测入口](./evals/location_verification/README.md)。
+
 ## 运行
 
 需要 Python 3.9+；运行和测试只使用标准库。仓库根目录的入口无需安装依赖：

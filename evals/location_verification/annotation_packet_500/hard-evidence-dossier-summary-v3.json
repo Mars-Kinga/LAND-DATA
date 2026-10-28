@@ -1,0 +1,20 @@
+{
+  "case_count": 155,
+  "dossiers_sha256": "2d6719b4568fa55382a22121a406649dfb49493b3af10fd6623188ed9b698ac5",
+  "gold_labels": 0,
+  "input_hashes": {
+    "capture_manifest": "5cae01939ee4bf76535b5aa2d6e3544368f0d8d34b12302237778f6f6d2de5c6",
+    "current_dot": "083f896643e6623f2ebf02f2505010b73ae9f5553416ed537f2fc2fb0136e12c",
+    "db": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11",
+    "historical_dot": "f45c8fe037a737c1e42e8749da2036da156f282d6f9ab7d393f85ffc03aa883d",
+    "shortlist": "fd2adfee9ba45a62c98df40a26c9817f053458d652254d8a08f6972f747e1629",
+    "temporal": "a00d856205f79afae701815cbd391cf2a90adb707cffbae6c9b69139bf2ae8ba"
+  },
+  "scope": "Unlabelled reviewer evidence; not Gold or Agent-visible test input",
+  "source_record_counts": {
+    "DOHMH_FROZEN": 155,
+    "DOHMH_LATEST": 3,
+    "DOT_CURRENT": 37,
+    "DOT_HISTORICAL": 129
+  }
+}

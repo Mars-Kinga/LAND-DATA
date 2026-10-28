@@ -1,0 +1,21 @@
+{
+  "case": {
+    "allowed_tools": [
+      "lookup_existing_poi",
+      "search_official_source"
+    ],
+    "as_of": "2026-10-28T00:00:00Z",
+    "case_id": "synthetic-paired-v1",
+    "claims": [
+      {
+        "field": "address",
+        "value": "9 Example Street"
+      }
+    ],
+    "identity_key": "synthetic-venue-1",
+    "max_calls": 2,
+    "max_decisions": 3
+  },
+  "schema_version": "lv-replay-input-v1",
+  "tool_manifest_sha256": "9543f23c0a2f1a16a2cc756fc085b231b40a6ecff79ed0e424d32070eeb33bb4"
+}

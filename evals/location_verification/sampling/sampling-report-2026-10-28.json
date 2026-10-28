@@ -1,0 +1,97 @@
+{
+  "schema_version": "lv-sampling-report-v1",
+  "generated_at_utc": "2026-10-27T17:06:43.723915+00:00",
+  "sampling_seed": 20261028,
+  "quotas": {
+    "New York": 800,
+    "Hanoi": 200
+  },
+  "queue_sha256": "9de97eeae5d4ea9badb5677e727faa6d4659887c913e8b394fdca66f112b1e86",
+  "queue_rows": 1000,
+  "script_sha256": "e4173a1db422caf5ad7146f48cb1727126f3e81ea46232f835236c7a5e65f4db",
+  "freeze_manifest_sha256": "922931df7d3a57bda867131c7b8890dc7442067c7b29b1a9c0d9f49e4a4230f2",
+  "source_snapshots": {
+    "New York": {
+      "snapshot": "nyc-incremental-acceptance-v2.db",
+      "sha256": "6e4169a739776b3e48e8cb504f27ea8b808e424e04ccc1fac6db59763e5f7a11"
+    },
+    "Hanoi": {
+      "snapshot": "land-data.db",
+      "sha256": "b1508851cbb0eec6047a64b15daca955526e032fa07e27e69b3685f632e97580"
+    }
+  },
+  "source_pool": {
+    "New York": {
+      "snapshot": "nyc-incremental-acceptance-v2.db",
+      "candidate_rows_in_snapshot": 12704,
+      "excluded_mock_rows": 0,
+      "excluded_xhs_rows": 0,
+      "excluded_missing_source_rows": 0,
+      "unique_entity_count": 12485,
+      "unique_source_count": 12704,
+      "selected_rows": 800
+    },
+    "Hanoi": {
+      "snapshot": "land-data.db",
+      "candidate_rows_in_snapshot": 300,
+      "excluded_mock_rows": 0,
+      "excluded_xhs_rows": 31,
+      "excluded_missing_source_rows": 0,
+      "unique_entity_count": 231,
+      "unique_source_count": 269,
+      "selected_rows": 200
+    }
+  },
+  "queue_validation": {
+    "rows": 1000,
+    "city_counts": {
+      "Hanoi": 200,
+      "New York": 800
+    },
+    "unique_candidate_ids": 1000,
+    "unique_source_content_ids": 1000,
+    "unique_entity_group_digests": 1000,
+    "unique_source_group_digests": 1000
+  },
+  "selected_distribution": {
+    "city": {
+      "Hanoi": 200,
+      "New York": 800
+    },
+    "platform": {
+      "nyc-open-data-restaurants": 790,
+      "osm": 210
+    },
+    "category_top20": {
+      "restaurant": 825,
+      "hotel": 39,
+      "cafe": 35,
+      "place_of_worship": 25,
+      "bar": 15,
+      "theatre": 13,
+      "museum": 11,
+      "attraction": 10,
+      "hostel": 8,
+      "guest_house": 7,
+      "marketplace": 7,
+      "gallery": 5
+    },
+    "evidence_count_distribution": {
+      "1": 8,
+      "2": 992
+    },
+    "evidence_type_counts": {
+      "GOVERNMENT_COORDINATES": 782,
+      "GOVERNMENT_RECORD": 790,
+      "OSM_COORDINATES": 210,
+      "OSM_OBJECT": 210
+    },
+    "rows_with_coordinates": 992,
+    "collected_at_min": "2026-09-23T01:03:37.308983Z",
+    "collected_at_max": "2026-10-18T15:17:04.402639Z"
+  },
+  "is_gold": false,
+  "split_labels_present": false,
+  "difficulty_quotas_guaranteed": false,
+  "status_boundary": "AUTO_APPROVED in the source import is an existing pipeline status, not independent Gold; each queue row still requires case qualification, independent annotation, and external evidence before any locked-test consideration"
+}

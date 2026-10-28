@@ -1,0 +1,30 @@
+{
+  "schema_version": "lv-replay-tools-v1",
+  "case_id": "synthetic-paired-v1",
+  "tools": {
+    "lookup_existing_poi": {
+      "source_groups": ["synthetic-existing"],
+      "evidence": [{
+        "claim_field": "address",
+        "value": "9 Example Street",
+        "source_id": "synthetic-existing-1",
+        "source_group": "synthetic-existing",
+        "observed_at": "2026-10-27T00:00:00Z",
+        "identity_key": "synthetic-venue-1",
+        "content_hash": "sha256:synthetic-existing-1"
+      }]
+    },
+    "search_official_source": {
+      "source_groups": ["synthetic-official"],
+      "evidence": [{
+        "claim_field": "address",
+        "value": "9 Example Street",
+        "source_id": "synthetic-official-1",
+        "source_group": "synthetic-official",
+        "observed_at": "2026-10-27T00:00:00Z",
+        "identity_key": "synthetic-venue-1",
+        "content_hash": "sha256:synthetic-official-1"
+      }]
+    }
+  }
+}
