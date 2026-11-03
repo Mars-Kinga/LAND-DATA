@@ -2,6 +2,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from land_data.models import FieldProvenance, POI, RawSourceRecord, SourceContent
 from land_data.place_release_bridge import (
@@ -75,9 +76,10 @@ class PlaceReleaseBridgeTests(unittest.TestCase):
 
     def test_app_checks_use_xcode_toolchain_and_isolated_build_paths(self):
         runner = FailingRunner(False)
-        ok, records = _run_place_checks(
-            Path("/tmp/LAND-test"), Path("/tmp/content-pack.json"),
-            "place-release", runner=runner, run_app_checks=True)
+        with mock.patch("land_data.place_release_bridge.Path.is_dir", return_value=True):
+            ok, records = _run_place_checks(
+                Path("/tmp/LAND-test"), Path("/tmp/content-pack.json"),
+                "place-release", runner=runner, run_app_checks=True)
         self.assertTrue(ok)
         self.assertEqual(len(records), 3)
         self.assertIn("--scratch-path", runner.calls[1])
@@ -85,6 +87,24 @@ class PlaceReleaseBridgeTests(unittest.TestCase):
         self.assertEqual(
             runner.kwargs[1]["env"].get("DEVELOPER_DIR"),
             "/Applications/Xcode.app/Contents/Developer")
+
+    def test_app_checks_without_default_xcode_preserve_toolchain_selection(self):
+        for selected in (None, "/opt/custom-xcode/Developer"):
+            with self.subTest(developer_dir=selected):
+                runner = FailingRunner(False)
+                environment = {} if selected is None else {"DEVELOPER_DIR": selected}
+                with mock.patch.dict("os.environ", environment, clear=True), \
+                        mock.patch("land_data.place_release_bridge.Path.is_dir", return_value=False):
+                    ok, records = _run_place_checks(
+                        Path("/tmp/LAND-test"), Path("/tmp/content-pack.json"),
+                        "portable-release", runner=runner, run_app_checks=True)
+                self.assertTrue(ok)
+                self.assertEqual(len(records), 3)
+                for kwargs in runner.kwargs:
+                    if selected is None:
+                        self.assertNotIn("DEVELOPER_DIR", kwargs["env"])
+                    else:
+                        self.assertEqual(kwargs["env"]["DEVELOPER_DIR"], selected)
 
     def test_cli_exposes_explicit_place_release_steps(self):
         parsed = build_parser().parse_args([

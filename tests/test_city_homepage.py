@@ -19,13 +19,36 @@ class CityHomepageTests(unittest.TestCase):
             calls.append((command, kwargs))
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
-        records = _run_homepage_checks(self.land_root, "homepage-hanoi-safe", runner=runner)
+        with mock.patch("land_data.city_homepage.Path.is_dir", return_value=True):
+            records = _run_homepage_checks(self.land_root, "homepage-hanoi-safe", runner=runner)
         self.assertEqual([item["command"] for item in records], ["xcrun", "xcodebuild"])
         self.assertIn("swift", calls[0][0])
         self.assertIn("generic/platform=iOS Simulator", calls[1][0])
         self.assertEqual(calls[0][1]["cwd"], str(self.land_root.resolve()))
         self.assertEqual(calls[1][1]["env"].get("DEVELOPER_DIR"),
                          "/Applications/Xcode.app/Contents/Developer")
+
+    def test_acceptance_checks_without_default_xcode_preserve_toolchain_selection(self):
+        for selected in (None, "/opt/custom-xcode/Developer"):
+            with self.subTest(developer_dir=selected):
+                calls = []
+
+                def runner(command, **kwargs):
+                    from types import SimpleNamespace
+                    calls.append(kwargs)
+                    return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+                environment = {} if selected is None else {"DEVELOPER_DIR": selected}
+                with mock.patch.dict("os.environ", environment, clear=True), \
+                        mock.patch("land_data.city_homepage.Path.is_dir", return_value=False):
+                    records = _run_homepage_checks(self.land_root, "portable", runner=runner)
+                self.assertEqual(len(records), 2)
+                self.assertTrue(all(item["returncode"] == 0 for item in records))
+                for call in calls:
+                    if selected is None:
+                        self.assertNotIn("DEVELOPER_DIR", call["env"])
+                    else:
+                        self.assertEqual(call["env"]["DEVELOPER_DIR"], selected)
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
