@@ -29,7 +29,7 @@ Dashboard 不接受页面输入的 shell 命令、模型、工作目录或执行
 Qwen 调用：0
 ```
 
-Codex 的工作目录固定为 LAND，LAND-DATA 以受控的附加目录提供采集任务规范和发布桥接。Dashboard 使用参数数组启动进程，不经过 shell；城市名称和原因只作为 JSON 数据传入。
+Codex 的工作目录固定为 LAND；任务 JSON 保存 LAND-DATA 任务规范和发布桥接信息。当前启动参数不添加 `--add-dir`，不能把任务规范中的路径说明等同于额外目录写权限。Dashboard 使用参数数组启动进程，不经过 shell；城市名称和原因只作为 JSON 数据传入。
 
 任务文件保存到：
 
@@ -74,3 +74,10 @@ Codex 退出后，Dashboard 会再次读取 registry：
 未审核的 Raw、社区原文和待审候选不会因为主页任务完成而直接进入 App。后续更新继续从 LAND-DATA Dashboard 运行，发布包保留版本、差异和回滚记录。
 
 任务规范本身只在本机保存；Dashboard 不调用千问，也不会把 `TASK_READY`、`IN_PROGRESS` 或 `NEEDS_ACCEPTANCE` 显示成已经上线。
+
+
+## 本地工作区的内容就绪检查
+
+2026-11-03 本地新增 `visual_shell_ready` 与 `content_readiness`。前者来自 registry 的 ready；后者根据 registry 的 `contentRequirements` 检查 destination 是否存在，以及需要时至少有一个 Place 或 Guide，并报告数量和缺失项。`published` 仅在两者都满足时为真；返回的 locales 是要求信息，不代表已经逐语言验收。
+
+公开代码基线 `50d3438` 尚无这组内容检查，不能把它的 `published=ready` 解释成数据已完整发布。本次文档同步未发布该代码扩展，版本区别见[实现状态](implementation-status.md)。

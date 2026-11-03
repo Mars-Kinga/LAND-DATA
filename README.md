@@ -2,6 +2,10 @@
 
 LAND-Data 是 LAND 的独立地点、活动、文化知识与推荐数据采集和审核工具。它把来源采集、去重、确定性处理、可选的模型抽取、人工审核和发布准备分开，便于在不依赖 Codex 的情况下长期运行。
 
+## 当前实现与版本
+
+截至 2026-11-03，公开代码基线 `50d3438` 已包含 QAU 和 Place 发布桥，以及开发期 Location Verification Harness。本地另有未提交的类别、语言、经验字段和 QAU 扩展；本次文档同步未发布这些业务代码。各项能力、版本差异和未完成工作见[实现状态](./docs/implementation-status.md)。
+
 ## 问题—架构—结果
 
 **问题：** 旅行数据来自多个来源，格式、更新频率、授权和可信度不同；直接把网页或社区帖子写进 App，容易混淆个人经验、地点事实和动态信息，也难以断点续跑。
@@ -52,7 +56,7 @@ flowchart LR
 
 ## Location Verification Agent Harness（开发期）
 
-地点核验被拆成 Case、逐字段 Claim、带来源与时间的 Evidence，以及每一步 Action。决策器根据证据缺口提议下一项工具或停止；Harness 负责只读工具白名单、参数、来源组、调用预算、SQLite checkpoint 与人工交接；独立的 Goal Gate 检查身份、时效、证据独立性和冲突，证据不足或模型失败时交人工。主命令支持固定顺序与千问策略，用相同冻结 Case／工具结果做配对回放。完整设计及 s01–s17 进度见[实施计划](./docs/location-verification-agent-harness-plan.md)，运行细节见[开发期报告](./evals/location_verification/harness_pilot/README.md)。
+地点核验被拆成 Case、逐字段 Claim、带来源与时间的 Evidence，以及每一步 Action。决策器根据证据缺口提议下一项工具或停止；Harness 负责只读工具白名单、参数、来源组、调用预算、SQLite checkpoint 与人工交接；独立的 Goal Gate 检查身份、时效、证据独立性和冲突，证据不足或模型失败时交人工。主命令支持固定顺序与千问策略，用相同冻结 Case／工具结果做配对回放。当前仍主要执行冻结证据回放；真实外部调查工具、修正提案、完整时间／成本预算、跨案记忆与后台任务尚未完成。当前实现矩阵见[实现状态](./docs/implementation-status.md)，完整设计及 s01–s17 进度见[实施计划](./docs/location-verification-agent-harness-plan.md)，运行细节见[开发期报告](./evals/location_verification/harness_pilot/README.md)。
 
 ```sh
 # 无需模型密钥：用仓库内合成 Case 做固定顺序、只读回放
@@ -65,7 +69,7 @@ flowchart LR
 
 真实业务候选可用 `location-verify-prepare-db` 从业务 SQLite **只读**冻结候选、来源元数据和关联 POI 上下文，再交给 `location-verify`；旧 `AUTO_APPROVED` 和 POI 关联不算独立身份真值。明确证据冲突可用 `location-verify-review-hold` 预览；仅显式 `--apply` 才把仍自动通过的候选及关联 POI 置为待审、关闭地图可见性并追加审核历史。此桥接只在临时数据库验证，尚未对真实业务库执行，也未成为默认发布前拦截。
 
-目前的量化结果是**工程验证**：本次公开提交快照的完整离线测试 313/313 通过；1,004 条真实记录的固定顺序、只读坐标一致性试验中，20 条跨来源差异被转人工，984 条在 10 米阈值内，模型调用为 0；另有 100 条真实业务候选完成准备与固定顺序回放，均因缺少独立身份依据交人工。合成单案的千问策略已成功选取两项模拟工具，但真实业务候选的千问尝试在首次决策时发生客户端错误并安全交人工。以上均**不是地点核验准确率或前后提升**；500 条独立人工 Gold、同条件动态策略对照及完整 s01–s17 实现仍未完成。评测口径见[评测入口](./evals/location_verification/README.md)。
+目前的量化结果是**工程验证**：2026-10-28 公开代码快照的完整离线测试记录为 313/313 通过；1,004 条真实记录的固定顺序、只读坐标一致性试验中，20 条跨来源差异被转人工，984 条在 10 米阈值内，模型调用为 0；另有 100 条真实业务候选完成准备与固定顺序回放，均因缺少独立身份依据交人工。合成单案的千问策略已成功选取两项模拟工具，但真实业务候选的千问尝试在首次决策时发生客户端错误并安全交人工。以上均**不是地点核验准确率或前后提升**；500 条独立人工 Gold、同条件动态策略对照及完整 s01–s17 实现仍未完成。评测口径见[评测入口](./evals/location_verification/README.md)。
 
 ## 运行
 
@@ -161,7 +165,11 @@ Dashboard 默认零 LLM。只有人工明确选择候选 ID、指定 `--llm auto
   --land-root ../LAND
 ```
 
-当前自动发布只覆盖 LAND QAU 知识内容。POI/Place、Event、官方 Guide/指导快照仍缺少到 LAND App 的发布映射和安装契约；它们可以采集、查看和审核，但不能因审核通过或 QAU release 成功就宣称已经进入 App。详细操作见[Dashboard 说明](./docs/review-dashboard.md)。
+当前已有 QAU 知识与 POI → Place 两条显式发布链。Place 支持只读预检、prepare/diff/verify/install/rollback，以及符合门槛的官方结构化来源自动路径；Event、官方 Guide/指导快照仍缺少通用发布契约。审核通过不代表已经安装到 App，详见[Place 发布说明](./docs/place-publishing.md)。详细操作见[Dashboard 说明](./docs/review-dashboard.md)。
+
+## LAND Place 本地发布
+
+明确选择 POI 后，使用 `place-publish preflight → prepare → diff → verify → install`；可用 `rollback` 恢复上一安装版本。符合门槛的 `official-directory`、`nyc-open-data-restaurants` 可使用确定性文案；OSM 和社区来源仍要求对应审核及 publication overlay。公开版本接受 restaurant/cafe/museum 并映射为 food/sight，人工 overlay 要求中英文；本地工作区已扩展类别并允许仅中文 overlay。具体字段、来源门槛与安装检查见[Place 发布说明](./docs/place-publishing.md)。
 
 ## LAND QAU 本地发布
 
@@ -174,10 +182,16 @@ Dashboard 默认零 LLM。只有人工明确选择候选 ID、指定 `--llm auto
 ./land-data publish install --release <release-id> --land-root ../LAND
 ```
 
-`install` 会备份当前 bundled QAU，原子替换后运行 Swift 测试和 Xcode iOS Simulator 构建；失败会自动恢复原文件。通过 Dashboard 安装必须使用 `--allow-install`；终端 `publish install` 仍然只接受明确 `VERIFIED` 的 release。显式回滚：
+`install` 会备份当前 bundled QAU，原子替换后默认运行 Swift 测试；失败会自动恢复原文件。需要额外验证 Xcode iOS Simulator 构建时显式加入 `--run-app-checks`，该检查失败同样会自动回滚。通过 Dashboard 安装必须使用 `--allow-install`；终端 `publish install` 仍然只接受明确 `VERIFIED` 的 release。显式回滚：
 
 ```sh
 ./land-data publish rollback --release <release-id> --land-root ../LAND --reason "回滚原因"
+```
+
+需要同时运行 Xcode 应用检查时：
+
+```sh
+./land-data publish install --release <release-id> --land-root ../LAND --run-app-checks
 ```
 
 小红书原帖、链接和作者身份仍不会发布。通过人工审核的个人经验可被改写为匿名的 `editorial_experience`，在 LAND 中明确显示为“旅行者经验 · LAND 编辑整理”，并且不能作为官方规则依据。动态规则只有经官方/运营方来源独立验证、带有效期且通过人工 release 核验后才能安装。详细操作见[操作说明](./操作说明.md#11-将已审核知识发布到-land)。
@@ -383,9 +397,9 @@ SourceAdapter（PUBLIC 或 AUTHENTICATED）
 
 ## 匹配、审核与导出
 
-基础 Entity Resolution 只用规范化名称或别名、城市、国家、类别和 250 米坐标距离。唯一精确匹配可绑定现有 POI；多个匹配、坐标冲突或证据不足进入 `NEEDS_REVIEW`，并留下 `AMBIGUOUS_POI_MATCH`、`CONFLICTING_COORDINATES`、`INSUFFICIENT_LOCATION_EVIDENCE` 等机器可读原因。只有配置明确授权坐标验证的结构化来源（Mock Places、OSM），才能自动创建 POI。社交内容仅匹配既有 POI 或进入审核；没有模糊 NLP 或真实社交 Adapter。
+基础 Entity Resolution 只用规范化名称或别名、城市、国家、类别和 250 米坐标距离。唯一精确匹配可绑定现有 POI；多个匹配、坐标冲突或证据不足进入 `NEEDS_REVIEW`，并留下 `AMBIGUOUS_POI_MATCH`、`CONFLICTING_COORDINATES`、`INSUFFICIENT_LOCATION_EVIDENCE` 等机器可读原因。只有配置明确授权坐标验证且满足字段门槛的结构化来源，才能自动创建 POI。社交内容匹配既有 POI 或进入审核；已有小红书浏览器采集、Threads Adapter 和可选模型抽取，复杂实体消歧仍需审核。
 
-POI 的 `map_visibility` 只有在坐标有效且已验证、验证通过、审核为 `AUTO_APPROVED`、地点有效且置信度达到配置阈值时为真。`REJECTED` 不会被重复验证自动改回批准。导出只包含可见 POI 和已批准 Mention；每个来源的 `export_fields` 决定来源链接、推荐摘要、信号能否进入最终数据。导出 schema 与 LAND iOS 现有 `Place` v1 并不相同，尚未接入 App。
+POI 的 `map_visibility` 只有在坐标有效且已验证、验证通过、审核为 `AUTO_APPROVED`、地点有效且置信度达到配置阈值时为真。`REJECTED` 不会被重复验证自动改回批准。导出只包含可见 POI 和已批准 Mention；每个来源的 `export_fields` 决定来源链接、推荐摘要、信号能否进入最终数据。普通 `export` 使用 LAND-DATA 自有 schema；进入 LAND App 应使用独立的 `place-publish` 或 QAU `publish` 发布桥，不能直接把普通导出当成 App 内容包。
 
 ## 人工审核 CLI（第二阶段 2A）
 
@@ -403,13 +417,13 @@ POI 的 `map_visibility` 只有在坐标有效且已验证、验证通过、审�
 ./land-data review promote <candidate_id>
 ```
 
-`show` 展示审核原因说明、完整对象字段、来源 URL/ID、保留中的 Raw 记录身份、地点证据、Candidate 的可能 POI 匹配以及 Mention 的推荐信号。Raw 正文不会作为 Raw payload 打印；来源允许保留的规范化标题与文本会显示。常见 credential 模式在输出时再次遮盖。Raw 过期删除后，保留的 SourceContent 和来源身份仍可追溯。`reviewer` 暂固定为 `local-user`。
+`show` 展示审核原因说明、完整对象字段、来源 URL/ID、保留中的 Raw 记录身份、地点证据、Candidate 的可能 POI 匹配以及 Mention 的推荐信号。Raw 正文不会作为 Raw payload 打印；来源允许保留的规范化标题与文本会显示。常见 credential 模式在输出时再次遮盖。Raw 过期删除后，保留的 SourceContent 和来源身份仍可追溯。普通审核 CLI 默认 reviewer 为 `local-user`；Dashboard 和 Codex 辅助审核会记录其入口提供的审核者。
 
 `reject` 必须提供非空原因。`approve` 适用于已绑定正式 POI 的 Mention、已解析 Candidate、或字段与坐标有效的 POI；未解析 Candidate 请使用 `resolve` 或 `promote`。`resolve` 校验 POI 存在、未被拒绝，且城市、国家、类别一致；原 Candidate 与证据不删除，关联 Mention 绑定正式 POI，RecommendationSignal 的 Mention 引用保持不变。`promote` 仅在 Candidate 已有名称、城市、国家、类别和有效坐标时创建正式 POI，不猜测缺失字段。两者在同一 SQLite 事务内更新对象、追加 Candidate 和 Mention 的 ReviewDecision，并补记来源；然后重新计算验证、评分与地图可见性。原机器审核原因保存在 Decision 的 `metadata.previous_review_reasons`，审核历史表禁止 UPDATE/DELETE。
 
 ## 局域网人工审核 Dashboard
 
-Dashboard 已覆盖城市创建、来源计划、采集/处理作业、进度与存储位置、全部状态浏览、人工审核、显式候选千问抽取以及 QAU prepare/diff/verify/install。审核范围、局域网安全边界、个人经验匿名发布、官方核验字段和关闭服务说明见[局域网采集与审核 Dashboard 操作说明](./docs/review-dashboard.md)。终端命令继续作为等价的备用入口；两者复用同一套审核、知识处理和发布服务。
+Dashboard 已覆盖城市创建、来源计划、采集/处理作业、进度与存储位置、全部状态浏览、人工审核、显式候选千问抽取以及 QAU／Place 的准备、差异、验证和显式安装（Place 另有只读预检）。审核范围、局域网安全边界、个人经验匿名发布、官方核验字段和关闭服务说明见[局域网采集与审核 Dashboard 操作说明](./docs/review-dashboard.md)。终端命令继续作为等价的备用入口；两者复用同一套审核、知识处理和发布服务。
 
 ### 可复现的 Mock 歧义场景
 
@@ -451,7 +465,16 @@ Threads 已提供环境变量 Token 接口和 `/me` 基础验证，但没有内�
 
 ## 结构
 
+### 本地需求文档约定
+
+本机 `doc/README.md` 是按功能编号的需求索引；`doc/01-info.md` 记录项目目标，其他文件分别描述城市配置、采集、处理、审核、发布与地点核验等功能。`doc/` 按约定加入 `.gitignore`，不会随 clone 或 pull 同步；共享的架构、操作和发布说明继续保存在 `docs/`。
+
+新增功能时，先复制 `doc/_template.md` 为下一个编号的 `NN-feature-name.md`，写清目标、范围、功能要求、设计原因、相关文件和验收条件，并更新本地索引。现有功能的小改动更新原文件，编号不重排。交给 AI 时可直接引用，例如 `@doc/09-location-verification.md`，并说明本次具体改动；完成后记录实际验证结果与未完成项。新工作区如果没有本地 `doc/`，按上述约定重建，或从原工作区另行复制。
+
 ```text
+doc/                    本地编号需求、索引与模板（Git 忽略）
+docs/                   共享架构、操作说明、设计与评测记录
+evals/                  评测协议、样本与结果说明
 config/                 城市与 Mock 来源策略
 fixtures/               完全虚构的来源数据
 src/land_data/
@@ -480,11 +503,11 @@ scripts/social_acceptance.py  完全离线的 2C 验收脚本
 - 默认仍使用确定性 Social Processing；LLM 地点抽取仅在 `--llm-extract` 明确启用且本机已配置凭据时运行。LLM 抽取结果需要真实小样本验收，不能把 Schema 合格等同于地点真实或推荐归属正确。
 - Raw 字段保留期已实现；规范化与衍生数据的跨层删除传播、平台许可审计和长期修订策略尚未实现。
 - 匹配算法仅适合基础精确场景；同名地点、多语言变体和复杂坐标冲突需要后续审核与算法改进。
-- 当前仅有本机 `local-user`，没有多用户并发锁、权限系统或撤销/合并审核工作流。
-- 机器原因码覆盖当前基础规则；跨来源冲突检测与复杂同名实体匹配仍待后续阶段。
+- 当前以本机审核为主，没有完整的多用户身份与权限体系。已有追加式审核历史和发布回滚；本地新增知识草稿撤回，不等于通用撤销／合并审核工作流。
+- 基础匹配已有歧义与坐标冲突原因码；开发期 Harness 另有来源组、身份和字段冲突检查。真实独立来源调查、复杂同名实体解析及默认发布前联动仍待完成。
 - OSM 只支持少数确定性类别、bbox 查询和小样本采集；Way/Relation 使用 Overpass 返回的几何中心，中心可能不在多边形内。scope 隔离根据 POI FieldProvenance 追溯 SourceContent 的采集 scope；没有复杂地理层级。OSM 更新同步只覆盖它原始创建的 POI，不提供完整版本历史。
 - Threads Adapter 已实现但未获得官方授权进行真实验收；`location_id` 覆盖率及官方字段/权限的实际可用性未知。规则推荐仅覆盖少数示例词。`UNAVAILABLE` 内容的旧 Derived 行保留用于追溯但不发布；删除地点后旧 Mention 失活，但旧 Candidate、Event 和审核历史没有通用版本修订系统。
-- 当前导出是 LAND-Data 的独立 schema；LAND iOS 现有 `Place` 契约没有 Mention/Signal 列表，接入需要单独设计并经确认。
+- 普通导出不直接作为 LAND 内容包；Place bridge 已负责专用映射。本地新增经审核的经验补充字段，未将完整 Mention/Signal 列表直接发布；公开版与本地扩展的区别见实现状态。
 
 ## License
 

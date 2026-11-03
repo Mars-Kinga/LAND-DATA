@@ -67,6 +67,21 @@ Codex 也可以通过终端写入同一份审核记录：
 因此 Codex 可以在当前对话中完成需要人看的审核，但发布仍保留独立的来源、字段、城市、内容和安装校验。
 这条路径完全不调用千问，千问调用数为 0。
 
+## 知识候选草稿（本地新增，未包含在公开代码基线）
+
+本节 `xhs knowledge import-draft` 已存在于 2026-11-03 本地工作区，公开代码基线 `50d3438` 尚无此子命令。本次仅同步说明，未发布该实现。
+
+地点审核与知识草稿是两条不同的安全边界。对于 `xhs_knowledge_candidates`，Codex 可以先读取本地可见证据，生成符合既有 QAU schema 的 JSON，再通过下面的零模型入口导入：
+
+```bash
+./land-data --db .local/land-data.db xhs knowledge import-draft \
+  --candidate-id <candidate-id> \
+  --draft .local/review-evidence/<candidate-id>-draft.json \
+  --reviewer-model codex:gpt-5
+```
+
+导入会重新校验证据逐字存在于原始可见字段中、场景不被改写、城市适用范围不越界，并把结果保持在 `DRAFT_NEEDS_REVIEW`。它只记录 `codex-import`，模型调用数为 0；仍需单独执行 `approve/reject`，动态事实仍强制附官方或运营方来源与有效期，之后还要经过 `publish prepare → diff → verify → install`。
+
 ## 版本
 
 默认策略版本是 `codex-assisted-review/v1`。如果审核规则发生变化，应显式传入新的

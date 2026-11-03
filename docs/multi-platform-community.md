@@ -7,7 +7,7 @@ LAND-DATA 把社区平台当作可插拔 provider。采集器负责搜索或接�
 | 平台 | 自动搜索 | 认证 | Dashboard | 默认 LLM |
 | --- | --- | --- | --- | --- |
 | 小红书 | 已实现，登录浏览器可见内容 | 本机 Chrome 登录 | 可启动 | 0 |
-| Threads | 已实现，Meta 官方关键词搜索 | 官方 OAuth token | 可启动 | 0 |
+| Threads | Adapter 已实现并有模拟测试；真实 OAuth 验收未完成 | 官方 OAuth token | 可启动 | 0 |
 | 其他平台 | provider contract 与 JSON 导入已实现 | 取决于来源 | 显示真实配置状态 | 0 |
 
 Threads 未配置 token 时，Dashboard 返回 `AUTH_REQUIRED`。token 不写入 URL、SQLite、任务参数或普通日志。关键词结果不等同于城市过滤，地点要继续经过解析和审核。

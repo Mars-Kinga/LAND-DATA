@@ -1,5 +1,7 @@
 # Location Verification Agent：基于 LAND-DATA 的 Harness 更新计划
 
+> **2026-11-03 实现核对：** 当前已实现开发期单案核心、CLI 回放与可选冲突 hold；完整 s01–s17、真实独立来源调查、修正提案和正式效果评测尚未完成。以下场景、运行契约和课程表保留为目标设计；当前逐项状态见[实现矩阵](implementation-status.md#harness-尚未完成)。历史进展数字仅对应各自快照。
+
 > 状态：设计与实施计划，初版 2026-10-27，2026-10-28 增补改前／改后评测。本文中的“拟实现”均不代表当前 LAND-DATA 已完成。参考 [Learn Claude Code 当前 s01–s17 主线](https://github.com/shareAI-lab/learn-claude-code/blob/main/README-zh.md)；旧版 `agents/` 和 `docs/` 是另一套章节编号。
 
 本计划的实现、运行与量化对象是 **LAND-DATA Python/SQLite 项目**。相邻的 LAND iOS App 不构成 Location Verification Agent 的部署或真机评测；简历中的 Agent Harness 指标必须来自 LAND-DATA 的可回放运行与同条件前后比较。
@@ -8,7 +10,7 @@
 
 把 LAND-DATA 已有的内容采集、地点提取和人工审核，延伸为一个能处理**单条地点争议**的调查 Agent。输入一条地点记录和待核验的问题，模型在有界工具池中选择下一项证据；Harness 保存状态、执行工具、校验结果、控制权限和预算，并在证据不足时交由人工。
 
-LAND-DATA 当前本地代码已有多来源采集、规则优先的候选分流、可选的通义千问抽取、SQLite 状态、输入哈希缓存、来源记录、人工审核和发布前检查。这些是可复用的基础。具体实现可从 [`local_classifier.py`](../src/land_data/local_classifier.py)、[`xhs_processing.py`](../src/land_data/xhs_processing.py)、[`llm_extraction.py`](../src/land_data/llm_extraction.py)、[`sqlite_storage.py`](../src/land_data/sqlite_storage.py)、[`review.py`](../src/land_data/review.py) 和 [`place_release_bridge.py`](../src/land_data/place_release_bridge.py) 核对。知识抽取路径要求显式选取候选并设上限；不同入口的 `--limit` 含义不同，不能概括为全系统统一 API 预算。**按证据缺口动态选择核验工具、连续更新地点声明、独立判断调查是否完成**是本计划新增的能力。先前 10 篇真实帖文中 17/19 个地点提及被抽取的实测仅评价“提取”，不能作为“地点已核验”的准确率。本地未提交的功能也不能当作公开仓库已有成果介绍。
+LAND-DATA 当前本地代码已有多来源采集、规则优先的候选分流、可选的通义千问抽取、SQLite 状态、输入哈希缓存、来源记录、人工审核和发布前检查。这些是可复用的基础。具体实现可从 [`local_classifier.py`](../src/land_data/local_classifier.py)、[`xhs_processing.py`](../src/land_data/xhs_processing.py)、[`llm_extraction.py`](../src/land_data/llm_extraction.py)、[`sqlite_storage.py`](../src/land_data/sqlite_storage.py)、[`review.py`](../src/land_data/review.py) 和 [`place_release_bridge.py`](../src/land_data/place_release_bridge.py) 核对。知识抽取路径要求显式选取候选并设上限；不同入口的 `--limit` 含义不同，不能概括为全系统统一 API 预算。**按证据缺口动态选择核验工具、连续更新地点声明、独立判断调查是否完成**是本计划的目标。目前已实现模型提议工具与独立 Gate 的开发期核心；声明修正、真实调查与完整验收仍待完成。先前 10 篇真实帖文中 17/19 个地点提及被抽取的实测仅评价“提取”，不能作为“地点已核验”的准确率。本地未提交的功能也不能当作公开仓库已有成果介绍。
 
 ## 一个可演示的垂直案例
 
@@ -20,7 +22,7 @@ LAND-DATA 当前本地代码已有多来源采集、规则优先的候选分流�
 4. 当近期官方搬迁公告与新地址身份信息一致时，输出“建议修正”，附地址和坐标的修改提案。若新旧门店身份仍无法区分，或近期可信来源冲突，则输出人工审核包。
 5. Agent 没有发布权限。建议修正经现有审核和发布流程处理。
 
-## 最小运行契约
+## 目标运行契约（并非全部已实现）
 
 `VerificationCase` 保存目标 POI、待核验字段、预算、状态和当前目标；`Claim` 保存字段、候选值、支持/反驳状态；`Evidence` 保存来源、时间、独立来源组、证据片段或定位、关联声明和内容哈希；`ActionRecord` 保存模型选择的工具、参数、预期价值、实际结果、耗时和调用成本。大型原文存外部文件或已有 SourceContent，消息中只留短摘要和可回读引用。
 
@@ -41,7 +43,7 @@ LAND-DATA 当前本地代码已有多来源采集、规则优先的候选分流�
 
 Goal Gate 与选工具的模型分开。它先用确定性检查确认关键声明有对应证据、证据属于同一门店、来源时间和独立性合格、没有未解决的重大冲突；必要时再用独立评估者解释边界案例。若模型提议停止但缺少关键证据，继续调查；若已无有效动作或预算耗尽，交人工。外部工具不可用单独记为可重试失败，不当成“地点不存在”。
 
-## s01–s17 对应关系
+## s01–s17 目标对应关系
 
 下表覆盖教程的 17 个机制。`核心`表示这个地点核验案例需要；`条件启用`表示已有明确触发场景后再增加。章节含义以仓库根目录当前课程为准。
 

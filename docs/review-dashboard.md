@@ -12,11 +12,11 @@
   → 规则处理（默认零 LLM）
   → Dashboard 查看全部对象
   → 人工审核、地点匹配、官方核验
-  → QAU `prepare → diff → verify`
+  → QAU 或 Place `prepare → diff → verify`
   → 显式允许后 `install` 到 LAND
   → 下一轮增量采集、重处理和发布
 
-Dashboard 已覆盖城市建档、来源计划、登录窗口触发、采集与处理作业、作业进度、数据位置、全部对象、人工审核以及 QAU 发布流程。手动增量更新时，在同一城市上重新启动相应作业；长期定时更新继续使用现有 launchd。
+Dashboard 已覆盖城市建档、来源计划、登录窗口触发、采集与处理作业、作业进度、数据位置、全部对象、人工审核以及 QAU／Place 发布流程。手动增量更新时，在同一城市上重新启动相应作业；长期定时更新继续使用现有 launchd。
 ```
 
 Dashboard 需要同时显示两类内容：
@@ -79,7 +79,7 @@ cd "$(git rev-parse --show-toplevel)"
   --port 8765
 ```
 
-如果需要让 Dashboard 执行已验证 QAU release 的安装，必须显式启动：
+如果需要让 Dashboard 执行已验证 QAU 或 Place release 的安装，必须显式启动：
 
 ```bash
 ./land-data --db .local/land-data.db dashboard \
@@ -239,7 +239,7 @@ Dashboard 安装按钮实际调用的 release 安装逻辑等价于：
   --land-root ../LAND
 ```
 
-安装会备份当前 QAU、原子替换、运行 Swift/Xcode 检查；失败自动恢复。Dashboard 不直接写 LAND App 资源，也不绕过构建检查。POI、Place、Guide、Event 仍需各自的发布映射和契约，不能因为 QAU release 成功就宣称所有采集数据已进入 App。
+安装会备份当前 QAU、原子替换、默认运行 Swift 验证；失败自动恢复。需要 Xcode iOS Simulator 构建检查时，终端命令加上 `--run-app-checks`。Dashboard 不直接写 LAND App 资源，也不绕过发布检查。Place 已有独立发布桥；Event 和官方 Guide/指导快照仍需各自的通用发布映射。QAU release 成功只说明该次知识内容发布。
 
 如需回滚：
 
@@ -252,11 +252,11 @@ Dashboard 安装按钮实际调用的 release 安装逻辑等价于：
 
 ### 7.1 地点内容（Place）
 
-Dashboard 第 4 步可以在“知识内容（QAU）”和“地点内容（Place）”之间切换。Place 发布只接受已经人工审核、坐标和来源完整的 `restaurant`、`cafe`、`museum`；Event 和官方 Guide 仍停留在 Dashboard 审核层，不会被误装进 LAND。
+Dashboard 第 4 步可以在“知识内容（QAU）”和“地点内容（Place）”之间切换。Place 发布检查坐标、来源、状态及类别。符合完整门槛的官方结构化来源可走确定性路径；其他来源需要审核决定和 overlay。公开版支持 restaurant/cafe/museum；本地类别已扩展，见 [Place 发布说明](place-publishing.md)。Event 和官方指引快照仍在采集／审核层。
 
-Place prepare 需要两类人工输入：明确的 POI ID，以及双语 publication overlay。新手可以直接把 JSON 粘贴到 Dashboard 的文本框，或填写项目内的 overlay 文件路径；“生成填写模板”只生成空字段，不会从帖子或模型自动生成公开文案。
+Place prepare 必须明确 POI ID。符合官方确定性策略时 overlay 可省略；其他路径需要 publication overlay，公开版要求双语，本地工作区允许仅中文。新手可以直接把 JSON 粘贴到 Dashboard 的文本框，或填写项目内的 overlay 文件路径；“生成填写模板”只生成空字段，不会从帖子或模型自动生成公开文案。
 
-在输入 POI ID 后，Place 模式提供“0. 只读预检”。它可以不填写审核人、原因和 overlay，逐条显示 POI 的 blocker（包括缺失人工 `ReviewDecision`、城市不匹配、来源或字段不完整）；有 overlay 时也会检查中英文文案。预检结果会明确显示 `read_only=true` 和 `release_dir_created=false`，不会生成 release、写数据库审核记录，也不会启用安装按钮。知识内容模式下该按钮保持禁用。
+在输入 POI ID 后，Place 模式提供“0. 只读预检”。它可以不填写审核人、原因和 overlay，逐条显示 POI 的 blocker（包括缺失人工 `ReviewDecision`、城市不匹配、来源或字段不完整）；有 overlay 时也会按当前版本检查所提供的语言字段；返回 approval_mode 和 overlay_mode 以区分官方确定性路径与人工路径。预检结果会明确显示 `read_only=true` 和 `release_dir_created=false`，不会生成 release、写数据库审核记录，也不会启用安装按钮。知识内容模式下该按钮保持禁用。
 
 Dashboard 页面会在第 4 步显示当前绑定的 SQLite 数据库绝对路径；审核、预检和采集进度都读取这个数据库。切换数据库需要用新的 `--db` 参数重新启动 Dashboard。
 
@@ -273,7 +273,7 @@ Dashboard 页面会在第 4 步显示当前绑定的 SQLite 数据库绝对路�
   --overlay overlays/new-york-places.json
 ./land-data --db .local/land-data.db place-publish diff --release <release-id>
 ./land-data --db .local/land-data.db place-publish verify \
-  --release <release-id> --reviewer "mars" --reason "已核对地点、双语文案和来源"
+  --release <release-id> --reviewer "mars" --reason "已核对地点、发布文案和来源"
 ./land-data --db .local/land-data.db place-publish install \
   --release <release-id> --land-root ../LAND
 ./land-data --db .local/land-data.db place-publish rollback \
@@ -340,7 +340,7 @@ lsof -nP -iTCP:<port> -sTCP:LISTEN
 9. 仅选择的候选才触发千问，打开页面和浏览列表的 LLM 调用数为 0；
 10. `publish prepare` 只读取已接受输入，未审核对象不能混入 release；
 11. `publish verify` 缺审核人、理由、来源闭包、有效期或存在 blocker 时失败；
-12. `publish install` 的 Swift/Xcode 检查失败会自动回滚；
+12. `publish install` 的 Swift 检查失败会自动回滚；显式加入 `--run-app-checks` 时，Xcode 应用检查失败也会自动回滚；
 13. 关闭服务后端口释放，SQLite 与审核历史保持完整；
 14. 同一审核操作刷新或重复提交不会产生两次决定；
 15. 所有错误页和日志不泄露 Cookie、密码、Token、作者凭据或未授权原文。
@@ -388,11 +388,11 @@ lsof -nP -iTCP:<port> -sTCP:LISTEN
 
 Dashboard 的 `/api/workflow/jobs`、`/api/workflow/storage` 和 `/api/workflow/plan` 会显示这些运行的状态、计数、checkpoint 相关来源记录和存储路径。后续更新按同一城市、同一数据库重跑；来源适配器按稳定 ID 去重并从 checkpoint 续跑，成功后再由 Dashboard 重新审核变化对象并生成下一版 QAU release。
 
-当前自动发布只覆盖 LAND QAU 知识内容。POI/Place、Event、官方 Guide/指导快照还没有完成到 LAND App 的发布映射、schema 契约和安装验收；它们可以在 Dashboard 查看和审核，但不能因为审核通过或 QAU release 成功就宣称已经进入 App。
+当前已有 QAU 和 Place 两条显式发布链；Event、官方 Guide/指导快照尚无通用发布桥。内容准备、发布包验证、安装与 App 验收分别记录，不能由审核通过推断已经进入 App。
 
 ## 13. 当前 CLI 对照
 
-以下终端命令与 Dashboard 使用同一套服务，可作为脚本化或故障恢复入口。Dashboard 已覆盖城市创建、采集与处理作业、显式候选模型抽取、对象查看、普通审核、知识草稿审核、来源/活动/官方快照审核以及 QAU prepare/diff/verify/install（安装需 `--allow-install`）：
+以下终端命令与 Dashboard 使用同一套服务，可作为脚本化或故障恢复入口。Dashboard 已覆盖城市创建、采集与处理作业、显式候选模型抽取、对象查看、普通审核、知识草稿审核、来源/活动/官方快照审核以及 QAU／Place prepare/diff/verify/install 和 Place preflight（安装需 `--allow-install`）：
 
 ```bash
 ./land-data review list
@@ -414,3 +414,10 @@ Dashboard 的 `/api/workflow/jobs`、`/api/workflow/storage` 和 `/api/workflow/
 ```
 
 Dashboard 与 CLI 应共享同一 ReviewService、knowledge review 和 publish 函数，不能各自实现一套状态转换规则。
+
+
+## Location Verification 接入状态
+
+Harness 目前通过 `location-verify*` CLI 独立运行，`location-verify-queue` 提供只读案件列表；Dashboard 尚无完整的 Harness 案件调查和裁决界面。`location-verify-review-hold` 默认预览，显式 `--apply` 只处理符合条件的证据冲突，不能把模型错误或预算耗尽当作地点错误。当前仅有临时数据库验证，未成为默认发布前步骤，详见[实现状态](implementation-status.md)。
+
+Place 安装默认执行内容校验，应用检查可显式开启；QAU 安装默认 Swift 测试。主页 registry 的 ready 说明视觉主页已验收；本地工作区另检查 destination、place、guide 等内容要求，以 `visual_shell_ready` 和 `content_readiness` 分别报告。
